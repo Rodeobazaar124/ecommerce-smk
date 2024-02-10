@@ -84,15 +84,43 @@ Route::group([
     });
     Route::post('/buy', function (Request $request) {
         // return $request;
-        $product = $request->validate([
+        $data = $request->validate([
             'product_id' => 'exists:products,id',
             'amount' => 'numeric'
         ]);
-        $which = product::where('id', $product['product_id'])->get();
-        $which->update(['stock' => $which->stock -  $product['amount']]);
-        $product['total_price'] = $which->price * $product['amount'];
-        $product['user_id'] = auth()->user()->id;
-        transaction::create($product);
+        $product = product::where('id', $data['product_id'])->first();
+        if ($product->stock <  $data['amount']) {
+            return redirect()->back()->withErrors(['amount' => 'Quantity or Amount cannot be greater than available stock']);
+        }
+        $product->update(['stock' => $product->stock -  $data['amount']]);
+        $data['total_price'] = $product->price * $data['amount'];
+        $data['user_id'] = auth()->user()->id;
+        transaction::create($data);
         return redirect()->route('home')->with('success', 'Product successfully added to your cart/transaction');
     })->name('handleBuy');
+});
+//  Admin Routes
+Route::group([
+    'middleware' => ['auth', 'admin']
+], function () {
+    Route::get('dashboard', function () {
+        $transactions = transaction::latest()->get();
+        // return $transactions;
+        return view('dashboard.index', compact('transactions'));
+    });
+    Route::get('dashboard/product', function () {
+        $products = product::latest()->get();
+        // return $transactions;
+        return view('dashboard.product.index', compact('products'));
+    })->name('product.index');
+    Route::get('dashboard/product/{product:id}', function (product $product) {
+        $products = product::latest()->get();
+        // return $transactions;
+        return view('dashboard.product.index', compact('products'));
+    })->name('product.edit');
+    Route::delete('product/{product:id}', function (product $product) {
+        $product->deleteOrFail();
+
+        return redirect()->back()->with('success', 'product deleted successfully');
+    })->name('product.delete');
 });

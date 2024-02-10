@@ -39,7 +39,7 @@
                         @convert($prod->price)
                     </td>
                     <td>
-                        <a href="{{ '/buy/' . $prod->id }}">
+                        <a href="{{ $prod->stock < 1 ? '' : '/buy/' . $prod->id }}">
                             <button>Beli</button>
                         </a>
                     </td>

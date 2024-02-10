@@ -8,6 +8,8 @@
 </head>
 
 <body>
+    <x-SangPenyampai />
+
     <table border="1">
         <tbody>
             <tr>

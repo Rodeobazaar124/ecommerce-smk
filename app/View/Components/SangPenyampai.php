@@ -29,6 +29,9 @@ class SangPenyampai extends Component
         @if(Session::has('message'))
         <p>{{ Session::get('message') }}</p>
         @endif
+        @if(Session::has('success'))
+        <p>{{ Session::get('success') }}</p>
+        @endif
 blade;
     }
 }
