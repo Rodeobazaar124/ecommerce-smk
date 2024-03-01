@@ -20,10 +20,11 @@ class OrderController extends Controller
      */
     public function index()
     {
+        $orders = [];
         if (Auth::user()->is_admin){
             $orders = Order::all();
         } else {
-            $orders = Order::where('user_id', Auth::user()->id);
+            $orders = Order::where('user_id', Auth::user()->id)->get();
         }
         return view('order.index', compact('orders'));
     }

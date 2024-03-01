@@ -1,15 +1,15 @@
 <x-app-layout>
-    <div class="container mx-auto">
+    <div class="container mx-auto py-8">
         <div class="flex justify-center">
             <div class="w-full md:w-8/12">
-                <div class="bg-white p-6 rounded-md shadow-md">
+                <x-card>
                     <div class="text-lg font-semibold">{{ __('Orders') }}</div>
                     <div class="mt-4">
                         @foreach ($orders as $order)
                             <div class="mb-2 w-96">
-                                <div class="bg-white p-4 border border-gray-300">
+                                <div class="bg-white p-4 border border-gray-300 w-full">
                                     <a href="{{ route('show_order', $order) }}">
-                                        <h5 class="text-xl font-semibold">Order ID {{ $order->id }}</h5>
+                                        <h5 class="text-xl font-semibold">Order #{{ $order->id .'_' . $order->created_at->format('dmY') }}</h5>
                                     </a>
                                     <h6 class="text-gray-600">By {{ $order->user->name }}</h6>
                                     @if ($order->is_paid)
@@ -34,7 +34,7 @@
                             </div>
                         @endforeach
                     </div>
-                </div>
+                </x-card>
             </div>
         </div>
     </div>

@@ -42,33 +42,35 @@
                 @endforeach
             </div>
         </x-card>
-        <x-card class="flex flex-col  bg-white w-1/4" innerClass="flex justify-content-end items-end">
-            @if ($total_price >= 50000)
+        @if (!$carts->isEmpty())
+            <x-card>
+                @if ($total_price >= 50000)
+                    @php
+                        $discount = 0.1 * $total_price;
+                        $disc = '10%';
+                    @endphp
+                @else
+                    @php
+                        $discount = 0;
+                        $disc = '0';
+                    @endphp
+                @endif
                 @php
-                    $discount = 0.1 * $total_price;
-                    $disc = '10%';
+                    $total_bayar = $total_price - $discount;
                 @endphp
-            @else
-                @php
-                    $discount = 0;
-                    $disc = '0';
-                @endphp
-            @endif
-            @php
-                $total_bayar = $total_price - $discount;
-            @endphp
 
-            <p>Total: Rp{{ $total_price }}</p>
-            <p>Besaran Diskon: {{ $disc }}</p>
-            <p>Diskon: Rp{{ $discount }}</p>
-            <p>Total Bayar: Rp{{ $total_bayar }}</p>
-            <p class="dark:text-white">Total: <x-idr :value="$total_price" /></p>
-            <form action="{{ route('checkout') }}" method="post">
-                @csrf
-                <button
-                    class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
-                    type="submit" {{ $carts->isEmpty() ? 'disabled' : '' }}>Checkout</button>
-            </form>
-        </x-card>
+                <p>Total: <x-idr :value="$total_price" /></p>
+                <p>Besaran Diskon: {{ $disc }}</p>
+                <p>Diskon: <x-idr :value="$discount" /></p>
+                <p>Total Bayar: <x-idr :value="$total_bayar" /></p>
+                <form action="{{ route('checkout') }}" method="post">
+                    @csrf
+                    <button
+                        class="inline-flex items-center px-4 py-2 bg-gray-800 dark:bg-gray-200 border border-transparent rounded-md font-semibold text-xs text-white dark:text-gray-800 uppercase tracking-widest hover:bg-gray-700 dark:hover:bg-white focus:bg-gray-700 dark:focus:bg-white active:bg-gray-900 dark:active:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150"
+                        type="submit" {{ $carts->isEmpty() ? 'disabled' : '' }}>Checkout</button>
+                </form>
+            </x-card>
+        @endif
+
 
 </x-app-layout>

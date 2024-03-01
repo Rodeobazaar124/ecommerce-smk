@@ -1,4 +1,4 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700">
+<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 sticky top-0">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -20,16 +20,16 @@
                         @endif
                     @endauth
                     <x-nav-link :href="route('product.index')" :active="request()->routeIs('product.index')">
-                        {{ __('Produk') }}
+                        {{ __('Products') }}
                     </x-nav-link>
                     @auth
                         @if (Auth::user()->is_admin)
                             <x-nav-link :href="route('product.create')" :active="request()->routeIs('product.create')">
-                                {{ __('Tambah produk') }}
+                                {{ __('Add Product') }}
                             </x-nav-link>
                         @endif
                         <x-nav-link :href="route('order.index')" :active="request()->routeIs('order.index')">
-                            {{ __((auth()->user()->is_admin ? '' : 'My ') .'Order') }}
+                            {{ __((auth()->user()->is_admin ? '' : 'My ') . 'Order') }}
                         </x-nav-link>
                     @endauth
 
@@ -66,10 +66,11 @@
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
-                        <x-dropdown-link :href="route('cart.index')">
-                            {{ __('Cart') }}
-                        </x-dropdown-link>
-
+                        @if (Auth::check() && !Auth::user()->is_admin)
+                            <x-dropdown-link :href="route('cart.index')">
+                                {{ __('Cart') }}
+                            </x-dropdown-link>
+                        @endif
                         <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
