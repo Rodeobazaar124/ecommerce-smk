@@ -29,7 +29,7 @@
                             </x-nav-link>
                         @endif
                         <x-nav-link :href="route('order.index')" :active="request()->routeIs('order.index')">
-                            {{ __('Order' . (auth()->user()->is_admin ? '' : ' Saya')) }}
+                            {{ __((auth()->user()->is_admin ? '' : 'My ') .'Order') }}
                         </x-nav-link>
                     @endauth
 

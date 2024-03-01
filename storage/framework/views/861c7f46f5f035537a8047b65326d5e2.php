@@ -114,7 +114,7 @@
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['href' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(route('order.index')),'active' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(request()->routeIs('order.index'))]); ?>
-                            <?php echo e(__('Order' . (auth()->user()->is_admin ? '' : ' Saya'))); ?>
+                            <?php echo e(__((auth()->user()->is_admin ? '' : 'My ') .'Order')); ?>
 
                          <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>

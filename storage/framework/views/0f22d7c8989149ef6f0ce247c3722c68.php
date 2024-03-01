@@ -35,25 +35,25 @@
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-            <div class="flex gap-5">
+            <div class="grid grid-cols-4 gap-6">
                 <?php $__currentLoopData = $carts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cart): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <div class="w-[14rem]" style="width: 14rem;">
+                    <div class="w-full">
                         <img src="<?php echo e(url('storage/' . $cart->product->image)); ?>">
                         <div>
-                            <h5 class="dark:text-white text-2xl"><?php echo e($cart->product->name); ?></h5>
-                            <form action="<?php echo e(route('update.cart', $cart)); ?>" method="post">
+                            <h5 class="dark:text-white text-sm line-clamp-1 my-2"><?php echo e($cart->product->name); ?></h5>
+                            <form action="<?php echo e(route('update.cart', $cart)); ?>" method="post" class="flex">
                                 <?php echo method_field('patch'); ?>
                                 <?php echo csrf_field(); ?>
-                                    <?php if (isset($component)) { $__componentOriginal18c21970322f9e5c938bc954620c12bb = $component; } ?>
+                                <?php if (isset($component)) { $__componentOriginal18c21970322f9e5c938bc954620c12bb = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal18c21970322f9e5c938bc954620c12bb = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.text-input','data' => ['type' => 'number','name' => 'amount','value' => ''.e($cart->amount).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.text-input','data' => ['disabled' => true,'type' => 'number','name' => 'amount','value' => ''.e($cart->amount).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('text-input'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['type' => 'number','name' => 'amount','value' => ''.e($cart->amount).'']); ?>
+<?php $component->withAttributes(['disabled' => true,'type' => 'number','name' => 'amount','value' => ''.e($cart->amount).'']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal18c21970322f9e5c938bc954620c12bb)): ?>
@@ -64,16 +64,16 @@
 <?php $component = $__componentOriginal18c21970322f9e5c938bc954620c12bb; ?>
 <?php unset($__componentOriginal18c21970322f9e5c938bc954620c12bb); ?>
 <?php endif; ?>
-                                    <?php if (isset($component)) { $__componentOriginald411d1792bd6cc877d687758b753742c = $component; } ?>
+                                <?php if (isset($component)) { $__componentOriginald411d1792bd6cc877d687758b753742c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginald411d1792bd6cc877d687758b753742c = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.primary-button','data' => ['type' => 'submit']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.primary-button','data' => ['type' => 'submit','class' => 'p-0']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>
 <?php $component->withName('primary-button'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag && $constructor = (new ReflectionClass(Illuminate\View\AnonymousComponent::class))->getConstructor()): ?>
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['type' => 'submit']); ?>Update amount <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes(['type' => 'submit','class' => 'p-0']); ?>Update <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginald411d1792bd6cc877d687758b753742c)): ?>
 <?php $attributes = $__attributesOriginald411d1792bd6cc877d687758b753742c; ?>
@@ -135,6 +135,25 @@
 <?php $attributes = $attributes->except(collect($constructor->getParameters())->map->getName()->all()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['class' => 'flex flex-col  bg-white w-1/4','innerClass' => 'flex justify-content-end items-end']); ?>
+            <?php if($total_price >= 50000): ?>
+                <?php
+                    $discount = 0.1 * $total_price;
+                    $disc = '10%';
+                ?>
+            <?php else: ?>
+                <?php
+                    $discount = 0;
+                    $disc = '0';
+                ?>
+            <?php endif; ?>
+            <?php
+                $total_bayar = $total_price - $discount;
+            ?>
+
+            <p>Total: Rp<?php echo e($total_price); ?></p>
+            <p>Besaran Diskon: <?php echo e($disc); ?></p>
+            <p>Diskon: Rp<?php echo e($discount); ?></p>
+            <p>Total Bayar: Rp<?php echo e($total_bayar); ?></p>
             <p class="dark:text-white">Total: <?php if (isset($component)) { $__componentOriginal8eb618690d560649124b2702e9f6c82e = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal8eb618690d560649124b2702e9f6c82e = $attributes; } ?>
 <?php $component = App\View\Components\Idr::resolve([] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? (array) $attributes->getIterator() : [])); ?>

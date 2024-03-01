@@ -57,7 +57,7 @@ class ProductController extends Controller
 
         $file = $request->file('image');
         $data['image'] = time() . '_' . Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
-        Storage::disk('local')->put('public/' . $data['image'], $file->getContent());
+        Storage::disk('local')->put('public/product/' . $data['image'], $file->getContent());
         Product::create($data);
         return Redirect::route('product.index')->with(['success' => 'Produk' . $data['name'] . ' berhasil ditambahkan']);
     }
@@ -93,7 +93,7 @@ class ProductController extends Controller
         if ($request->hasFile('image')) {
             $file = $request->file('image');
             $new_data['image'] = time() . '_' . Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
-            Storage::disk('local')->put('public/' . $new_data['image'], $file->getContent());
+            Storage::disk('local')->put('public/product/' . $new_data['image'], $file->getContent());
             Storage::delete($product->image);
         }
 

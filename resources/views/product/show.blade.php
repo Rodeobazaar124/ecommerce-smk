@@ -35,13 +35,12 @@
                         </div>
                     </div>
                     <div class="flex justify-end items-center">
-                        <form action="{{ route('add.to.cart', $product) }}" method="POST"
-                            class="flex items-center justify-center gap-2">
+                        <form action="{{ route('add.to.cart', $product) }}" method="POST" class="flex items-center justify-center gap-2">
                             @csrf
                             @auth
-                                <input type="text" id="amount"
+                                <input type="text" name="amount"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-100 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    placeholder="Amount" required min="1" value="1" :max="$product - > stock" />
+                                    placeholder="Amount" required min="1" value="1" max="{{$product->stock}}" />
                                 <button
                                     class="text-white w-full border-2 inline-flex items-center bg-gray-800 hover:text-black hover:bg-gray-200 duration-[400ms] focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                                     Add to cart
