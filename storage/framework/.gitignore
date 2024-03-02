@@ -8,5 +8,5 @@ routes.scanned.php
 schedule-*
 services.json
 views/*
-*/*.*
+sessions/*
 !*/.gitkeep

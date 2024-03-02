@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Redirect;
 class CartController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan seluruh produk yang sudah dimasukkan ke keranjang milik 1 user
      */
     public function index()
     {
@@ -21,60 +21,52 @@ class CartController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-    }
-
-    /**
-     * Store a newly created cart in storage.
+     * Menambahkan produk ke cart
+     *
+     * @param Product $product
+     * @param Request $request
      */
     public function addToCart(Product $product, Request $request)
     {
+        // Tampung id user dan id product
         $user_id = Auth::id();
         $product_id = $product->id;
+
+        /*
+        Cari cart dengan id product yang sudah di kirimkan dan
+         cek apakah cart tersebut sudah ada
+         bila belum maka validasi terlebih dahulu jumlahnya
+         */
         $existing_cart = Cart::where('product_id', $product_id)
             ->where('user_id', $user_id)
             ->first();
+
         if ($existing_cart === null) {
             $request->validate([
-                'amount' => 'required|gte:1|lte:'.$product->stock,
+                'amount' => 'required|gte:1|lte:' . $product->stock,
             ]);
 
+            // Buat cart baru dengan id user dan id product yang beserta amount yang sudah disesuaikan
             Cart::create([
                 'user_id' => $user_id,
                 'product_id' => $product_id,
                 'amount' => $request->amount,
             ]);
         } else {
+            // Validasi amount dan pastikan tidak lebih dari stok
             $request->validate([
-                'amount' => 'required|gte:1|lte:'.($product->stock -
+                'amount' => 'required|gte:1|lte:' . ($product->stock -
                     $existing_cart->amount),
             ]);
+            // ubah amount cart yang sudah ada
             $existing_cart->update([
                 'amount' => $existing_cart->amount + $request->amount,
             ]);
         }
-
+        // Redirect user ke halaman cart
         return Redirect::route('cart.index');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Cart $cart)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Cart $cart)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -82,7 +74,7 @@ class CartController extends Controller
     public function update_cart(Cart $cart, Request $request)
     {
         $request->validate([
-            'amount' => 'required|gte:1|lte:'.$cart->product->stock,
+            'amount' => 'required|gte:1|lte:' . $cart->product->stock,
         ]);
         $cart->update([
             'amount' => $request->amount,
@@ -92,12 +84,13 @@ class CartController extends Controller
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus keranjang user berdsarkan permintaan yang sudah dikirimkan
+     * @param Cart $cart
      */
     public function destroy(Cart $cart)
     {
         $cart->delete();
-
-        return Redirect::back();
+        // Arahkan user kembali ke halaman sebelumnya
+        return Redirect::back()->with(['success' => 'Produk berhasil dihapus dari keranjang']);
     }
 }

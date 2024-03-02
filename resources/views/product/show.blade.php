@@ -35,10 +35,24 @@
                         </div>
                     </div>
                     <div class="flex justify-end items-center">
-                        <form action="{{ route('add.to.cart', $product) }}" method="POST"
-                            class="flex items-center justify-center gap-2">
-                            @csrf
-                            @auth
+                        @if (Auth::check() && Auth::user()->is_admin)
+                            <form onsubmit="confirm('Apakah anda yakin ingin menghapus produk ini?')"
+                                action="{{ route('product.destroy', $product) }}" method="POST"
+                                class="flex items-center justify-center gap-2">
+                                @csrf
+                                <x-primary-button>
+                                    <a href="{{ route('product.edit', $product) }}">
+                                        Edit Product
+                                    </a>
+                                </x-primary-button>
+                                <x-danger-button>
+                                    Delete Product
+                                </x-danger-button>
+                            </form>
+                        @else
+                            <form action="{{ route('add.to.cart', $product) }}" method="POST"
+                                class="flex items-center justify-center gap-2">
+                                @csrf
                                 <input type="text" name="amount"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-100 dark:focus:ring-blue-500 dark:focus:border-blue-500"
                                     placeholder="Amount" min="1" value="1" max="{{ $product->stock }}"
@@ -47,15 +61,15 @@
                                     class="text-white w-full border-2 inline-flex items-center bg-gray-800 hover:text-black hover:bg-gray-200 duration-[400ms] focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-0 py-2.5 text-center justify-center">
                                     Add to cart
                                 </button>
-                            @endauth
-                            @guest
-                                <a href="{{ route('login') }}"
-                                    class="text-white inline-flex items-center bg-gray-800 hover:text-black hover:bg-gray-200 duration-[400ms] focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                                    <i class="dark:text-gray-100"></i>
-                                    Add to cart
-                                </a>
-                            @endguest
-                        </form>
+                            </form>
+                        @endif
+                        @guest
+                            <a href="{{ route('login') }}"
+                                class="text-white inline-flex items-center bg-gray-800 hover:text-black hover:bg-gray-200 duration-[400ms] focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
+                                <i class="dark:text-gray-100"></i>
+                                Add to cart
+                            </a>
+                        @endguest
                     </div>
                 </div>
             </div>

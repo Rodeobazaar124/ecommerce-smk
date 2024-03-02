@@ -27,30 +27,34 @@
                                     @endif
 
 
-                                    @if (Auth::user()->is_admin)
-                                        <div class="flex gap-2 my-1 flex-col">
+                                    <div class="flex gap-2 my-1 flex-col">
+                                        @if (Auth::user()->is_admin)
                                             <a href="{{ Storage::url($order->receipt) }}"><x-primary-button> See Payment
                                                     Receipt</x-primary-button></a>
-                                                    <div class="flex gap-2">
-                                                        <form action="{{ route('confirm_payment', $order) }}" method="post">
-                                                            @csrf
-                                                            <x-primary-button class="w-full"><span class="fa fa-check"></span></x-primary-button>
-                                                        </form>
-                                                        <form action="{{ route('reject_payment', $order) }}" method="post">
-                                                            @csrf
-                                                            <x-danger-button class="w-full"><i class="fa fa-ban"></i></x-danger-button>
-                                                        </form>
-                                                    </div>
-                                        </div>
-                                    @endif
-                                    <a href="{{route('nota', $order)}}"><x-primary-button class="fa fa-print"></x-primary-button></a>
-
+                                            <div class="flex gap-2">
+                                                <form action="{{ route('confirm_payment', $order) }}" method="post">
+                                                    @csrf
+                                                    <x-primary-button class="w-full"><span
+                                                            class="fa fa-check"></span></x-primary-button>
+                                                </form>
+                                                <form action="{{ route('reject_payment', $order) }}" method="post">
+                                                    @csrf
+                                                    <x-danger-button class="w-full"><i
+                                                            class="fa fa-ban"></i></x-danger-button>
+                                                </form>
+                                        @endif
+                                        @if ($order->status === 'paid')
+                                            <a href="{{ route('nota', $order) }}"><x-primary-button
+                                                    class="fa fa-print"></x-primary-button></a>
+                                        @endif
+                                    </div>
                                 </div>
                             </div>
-                        @endforeach
                     </div>
-                </x-card>
+                    @endforeach
             </div>
+            </x-card>
         </div>
+    </div>
     </div>
 </x-app-layout>

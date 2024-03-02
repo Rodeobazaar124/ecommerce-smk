@@ -13,14 +13,19 @@ use Illuminate\Support\Str;
 class ProductController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan seluruh produk
+     * atau bila ada request query tampilkan produk sesuai dengan query tersebut
+     * kemudian paginate
+     *
+     * @return view
      */
+
     public function index()
     {
         $products = [];
         if (request('query') && request('query') !== null) {
             $query = request('query');
-            $products = Product::where('name', 'like', '%'.$query.'%')->orWhere('price', 'like', '%'.$query.'%')->orWhere('description', 'like', '%'.$query.'%')->paginate(8);
+            $products = Product::where('name', 'like', '%' . $query . '%')->orWhere('price', 'like', '%' . $query . '%')->orWhere('description', 'like', '%' . $query . '%')->paginate(8);
         } else {
             $products = Product::paginate(8);
         }
@@ -35,7 +40,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Menampikan halaman buat produk baru untuk admin
      */
     public function create()
     {
@@ -43,28 +48,35 @@ class ProductController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Menyimpan produk yang sudah dikirimkan dari halaman 'product.create' ke databa
      */
     public function store(StoreProductRequest $request)
     {
+        // Validasi apakah semua data sudah diisi
         $data = $request->validate([
             'name' => 'required',
-            'price' => 'required',
+            'price' => 'required|number',
             'stock' => 'required',
             'description' => 'required',
-            'image' => 'required',
+            'image' => 'required|image',
         ]);
-
+        // Simpan file kedalam sebuah variabel
         $file = $request->file('image');
-        $data['image'] = time().'_'.Str::slug($request->name).'.'.$file->getClientOriginalExtension();
-        Storage::disk('local')->put('public/product/'.$data['image'], $file->getContent());
+        // Buat nama file baru berdasarkan timestamps
+        $data['image'] = time() . '_' . Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
+        // Simpan file dengan nama yang telah ditentukan
+        Storage::disk('local')->put('public/product/' . $data['image'], $file->getContent());
+        // Simpan data yang sudah di validasi ke database
         Product::create($data);
-
-        return Redirect::route('product.index')->with(['success' => 'Produk'.$data['name'].' berhasil ditambahkan']);
+        // Alihkan user/admin ke halaman home
+        return Redirect::route('product.index')->with(['success' => 'Produk ' . $data['name'] . ' berhasil ditambahkan']);
     }
 
     /**
-     * Display the specified resource.
+     * Menampilkan suatu produk
+     *
+     * @param Product $product
+     * @return view
      */
     public function show(Product $product)
     {
@@ -72,7 +84,10 @@ class ProductController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Tampilkan halaman edit product dengan mengirimkan data product sebelumnya
+     *
+     * @param Product $product
+     * @return view
      */
     public function edit(Product $product)
     {
@@ -80,31 +95,43 @@ class ProductController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     *
+     *
+     * @param UpdateProductRequest $request
+     * @param Product $product
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
+        // Validasi data yang dikirimkan kemudian simpan kedalam variable
         $new_data = $request->validate([
             'name' => 'required',
             'price' => 'required',
             'stock' => 'required',
             'description' => 'required',
-            'image' => 'nullable',
+            'image' => 'nullable|image',
         ]);
+        // Cek apakah file image tersedia
         if ($request->hasFile('image')) {
+            // simpan file ke variable
             $file = $request->file('image');
-            $new_data['image'] = time().'_'.Str::slug($request->name).'.'.$file->getClientOriginalExtension();
-            Storage::disk('local')->put('public/product/'.$new_data['image'], $file->getContent());
+            // buat nama file unik berdasarkan timestamps
+            $new_data['image'] = time() . '_' . Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
+            // Simpan gambar ke local disk
+            Storage::disk('local')->put('public/product/' . $new_data['image'], $file->getContent());
+            // Hapus gambar lama
             Storage::delete($product->image);
         }
-
+        // Update data product
         $product->update($new_data);
-
-        return redirect()->route('product.show', $product->id);
+        // Alihkan ke halaman show product
+        return Redirect::route('product.show', $product->id)->with(['success' => "Produk {$new_data['name']} berhasil diubah"]);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Menghapus product dari database dan local disk
+     *
+     * @param Product $product
+     * @return Redirect
      */
     public function destroy(Product $product)
     {

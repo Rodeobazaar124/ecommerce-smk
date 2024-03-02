@@ -16,59 +16,69 @@ use Illuminate\Support\Facades\Storage;
 class OrderController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Menampilkan list dari seluruh order yang dipunyai user, atau seluruh user.
      */
     public function index()
     {
+        // Inisiasi variable baru diluar scope if
         $orders = [];
+
+        // Cek apakah user Admin atau bukan
         if (Auth::user()->is_admin) {
+            // Berikan semua order yang telah di pesan semua user
             $orders = Order::all();
         } else {
+            // Berikan order yang hanya dia miliki
             $orders = Order::where('user_id', Auth::user()->id)->get();
         }
 
+        // Tampilkan view index order dengan data yang sudah di ambil
         return view('order.index', compact('orders'));
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Digunakan untuk checkout barang ketika user sudah selesai menyusun cart (store to order table)
      */
     public function checkout()
     {
+        // Dapatkan id user
         $user_id = Auth::id();
+        // Dapatkan semua produk di keranjang yang dimilikinya
         $carts = Cart::where('user_id', $user_id)->get();
+        // Bila tidak ada cart kembalikan ke halaman sebeumnya
         if ($carts == null) {
             return Redirect::back();
         }
+
+        // Buat 1 order baru untuk 1 user
         $order = Order::create([
             'user_id' => $user_id,
         ]);
+
+        // Ulang semua keranjang yang dipunya user
         foreach ($carts as $cart) {
+            // Cari nama product
             $product = Product::find($cart->product_id);
+            // Kurangin stock product
             $product->update([
                 'stock' => $product->stock - $cart->amount,
             ]);
+            // Buat transaksi baru
             Transaction::create([
                 'amount' => $cart->amount,
                 'order_id' => $order->id,
                 'product_id' => $cart->product_id,
             ]);
+            // Hapus keranjang nya
             $cart->delete();
         }
-
+        // Kembali ke halaman sebelumnya (cart)
         return Redirect::back();
     }
-
     /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreOrderRequest $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
+     * Menampilkan halaman suatu order. Berdasarkan params $order yang diberikan
+     *
+     * @param Order $order
      */
     public function show(Order $order)
     {
@@ -76,44 +86,39 @@ class OrderController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Digunakan untuk menyimpan bukti pembayaran milik user
+     *
+     * @param Order $order
+     * @param Request $request
      */
     public function store_receipt(Order $order, Request $request)
     {
+        // Validasi apakah user sudah mengirimi file?
+        $request->validate([
+            'payment_receipt' => 'required|image'
+        ]);
+
+        // Simpan file yang diberikan user kedalam variable
         $file = $request->file('payment_receipt');
-        $path = time().'_'.$order->id.'.'.$file->getClientOriginalExtension();
-        Storage::disk('local')->put('public/'.$path, $file->getContent());
+        // Buat nama file unik berdasarkan timestamps
+        $filename = time() . '_' . $order->id . '.' . $file->getClientOriginalExtension();
+        // Simpan file ke disk drive
+        Storage::disk('local')->put('public/' . $filename, $file->getContent());
+        // update order yang ada dengan menambahkan nama file receipt yang baru
         $order->update([
-            'receipt' => $path,
+            'receipt' => $filename,
         ]);
 
         return Redirect::back();
     }
-
     /**
-     * Show the form for editing the specified resource.
+     * Fungsi yang digunakan untuk mengubah status order
+     *
+     * Digunakan untuk mengubah status order menjadi paid (sudah dibayar)
+     *
+     * @param Order $order
+     * @return Redirect
      */
-    public function edit(Order $order)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateOrderRequest $request, Order $order)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Order $order)
-    {
-        //
-    }
-
     public function confirm_payment(Order $order)
     {
         $order->update([
@@ -122,7 +127,14 @@ class OrderController extends Controller
 
         return Redirect::back();
     }
-
+    /**
+     * Fungsi yang digunakan untuk mengubah status order
+     *
+     * Digunakan untuk mengubah status order menjadi ditolak (rejected)
+     *
+     * @param Order $order
+     * @return Redirect
+     */
     public function reject_payment(Order $order)
     {
         $order->status = 'rejected';
@@ -132,6 +144,14 @@ class OrderController extends Controller
         return Redirect::back();
     }
 
+    /**
+     * Mencetak nota
+     *
+     * Fungsi ini digunakan untuk mencetak nota pembayaran dari produk yang telah dibayar
+     *
+     * @param Order $order
+     * @return View order.nota
+     */
     public function nota(Order $order)
     {
         return view('order.nota', compact('order'));
