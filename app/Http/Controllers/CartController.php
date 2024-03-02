@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Cart;
 use App\Models\Product;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
@@ -17,6 +16,7 @@ class CartController extends Controller
     public function index()
     {
         $carts = Cart::where('user_id', Auth::id())->get();
+
         return view('cart.index', ['carts' => $carts]);
     }
 
@@ -39,23 +39,24 @@ class CartController extends Controller
             ->first();
         if ($existing_cart === null) {
             $request->validate([
-                'amount' => 'required|gte:1|lte:' . $product->stock
+                'amount' => 'required|gte:1|lte:'.$product->stock,
             ]);
 
             Cart::create([
                 'user_id' => $user_id,
                 'product_id' => $product_id,
-                'amount' => $request->amount
+                'amount' => $request->amount,
             ]);
         } else {
             $request->validate([
-                'amount' => 'required|gte:1|lte:' . ($product->stock -
-                    $existing_cart->amount)
+                'amount' => 'required|gte:1|lte:'.($product->stock -
+                    $existing_cart->amount),
             ]);
             $existing_cart->update([
-                'amount' => $existing_cart->amount + $request->amount
+                'amount' => $existing_cart->amount + $request->amount,
             ]);
         }
+
         return Redirect::route('cart.index');
     }
 
@@ -81,14 +82,14 @@ class CartController extends Controller
     public function update_cart(Cart $cart, Request $request)
     {
         $request->validate([
-            'amount' => 'required|gte:1|lte:' . $cart->product->stock
+            'amount' => 'required|gte:1|lte:'.$cart->product->stock,
         ]);
         $cart->update([
-            'amount' => $request->amount
+            'amount' => $request->amount,
         ]);
+
         return Redirect::route('cart.index');
     }
-
 
     /**
      * Remove the specified resource from storage.
@@ -96,6 +97,7 @@ class CartController extends Controller
     public function destroy(Cart $cart)
     {
         $cart->delete();
+
         return Redirect::back();
     }
 }

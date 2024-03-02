@@ -10,13 +10,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Product extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'price', 'description', 'image', 'stock'];
 
+    protected $fillable = ['name', 'price', 'description', 'image', 'stock'];
 
     /**
      * The orders that belong to the Product
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function orders(): BelongsToMany
     {
@@ -25,18 +23,14 @@ class Product extends Model
 
     /**
      * The carts that belong to the Product
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function carts(): BelongsToMany
     {
         return $this->belongsToMany(Cart::class);
     }
 
-       /**
+    /**
      * Get all of the transactions for the Product
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function transactions(): HasMany
     {

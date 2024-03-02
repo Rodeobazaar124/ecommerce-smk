@@ -4,7 +4,7 @@
         <div class="justify-center items-center w-full flex md:inset-0 h-[calc(100%-1rem)] max-h-full">
             <div class="relative p-2 w-full max-w-7xl max-h-full">
                 <!-- Modal content -->
-                <div class="relative p-4 dark:bg-gray-800 rounded-lg shadow sm:p-5">
+                <div class="relative bg-white p-4 dark:bg-gray-800 rounded-lg shadow sm:p-5">
                     <!-- Modal header -->
                     <div class="flex flex-col md:flex-row gap-4">
                         <div class="md:mb-4 md:w-[600px]">
@@ -35,12 +35,14 @@
                         </div>
                     </div>
                     <div class="flex justify-end items-center">
-                        <form action="{{ route('add.to.cart', $product) }}" method="POST" class="flex items-center justify-center gap-2">
+                        <form action="{{ route('add.to.cart', $product) }}" method="POST"
+                            class="flex items-center justify-center gap-2">
                             @csrf
                             @auth
                                 <input type="text" name="amount"
                                     class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-100 dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                    placeholder="Amount" required min="1" value="1" max="{{$product->stock}}" />
+                                    placeholder="Amount" min="1" value="1" max="{{ $product->stock }}"
+                                    required />
                                 <button
                                     class="text-white w-full border-2 inline-flex items-center bg-gray-800 hover:text-black hover:bg-gray-200 duration-[400ms] focus:ring-4 focus:outline-none focus:ring-gray-200 font-medium rounded-lg text-sm px-0 py-2.5 text-center justify-center">
                                     Add to cart
@@ -92,9 +94,5 @@
         </div> --}}
 
     </section>
-    <x-primary-button class="m-2">
-        <a class="p-2 rounded-md" href="{{ route('product.index') }}">
-            Back to Index Product
-        </a>
-    </x-primary-button>
+
 </x-app-layout>

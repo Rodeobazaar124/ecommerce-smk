@@ -9,29 +9,26 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Transaction extends Model
 {
     use HasFactory;
+
     protected $fillable = [
         'order_id',
         'product_id',
-        'amount'
+        'amount',
     ];
 
     /**
      * Get the order that owns the Transaction
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
     }
 
-/**
- * Get the product that owns the Transaction
- *
- * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
- */
-public function product(): BelongsTo
-{
-    return $this->belongsTo(Product::class);
-}
+    /**
+     * Get the product that owns the Transaction
+     */
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

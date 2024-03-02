@@ -4,7 +4,6 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -17,7 +16,6 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-
 
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -34,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/action/checkout', [OrderController::class, 'checkout'])->name('checkout');
     Route::post('/order/{order}/pay', [OrderController::class, 'store_receipt'])->name('store_receipt');
     Route::get('/order/{order}', [OrderController::class, 'show'])->name('show_order');
+    Route::get('/order/nota/{order}', [OrderController::class, 'nota'])->name('nota');
     Route::get('/order', [OrderController::class, 'index'])->name('order.index');
     Route::get('/product/{product}', [ProductController::class, 'show'])->name('product.show');
 });
@@ -44,7 +43,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/product/{product}/update', [ProductController::class, 'update'])->name('product.update');
     Route::get('/product/{product}/delete', [ProductController::class, 'destroy'])->name('product.destroy');
     Route::post('/order/{order}/confirm', [OrderController::class, 'confirm_payment'])->name('confirm_payment');
+    Route::post('/order/{order}/reject', [OrderController::class, 'reject_payment'])->name('reject_payment');
 });
 Route::get('/', [ProductController::class, 'index'])->name('product.index');
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

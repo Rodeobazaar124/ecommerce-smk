@@ -1,4 +1,5 @@
-<nav x-data="{ open: false }" class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 sticky top-0">
+<nav x-data="{ open: false }"
+    class="bg-white dark:bg-gray-800 border-b border-gray-100 dark:border-gray-700 sticky top-0 z-20">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -38,6 +39,13 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                @guest
+                            <a href="{{ route('login') }}"
+                                class="ltr:origin-top-right rtl:origin-top-left end-0 inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                <div>Login</div>
+                            </a>
+                        @endguest
+                @auth
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         @auth
@@ -54,19 +62,14 @@
                                 </div>
                             </button>
                         @endauth
-                        @guest
-                            <a href="{{ route('login') }}"
-                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                                <div>Login</div>
-                            </a>
-                        @endguest
+
                     </x-slot>
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
-                        @if (Auth::check() && !Auth::user()->is_admin)
+                        @if (!Auth::user()->is_admin)
                             <x-dropdown-link :href="route('cart.index')">
                                 {{ __('Cart') }}
                             </x-dropdown-link>
@@ -81,8 +84,10 @@
                                 {{ __('Log Out') }}
                             </x-dropdown-link>
                         </form>
+
                     </x-slot>
                 </x-dropdown>
+                @endauth
             </div>
 
             <!-- Hamburger -->
@@ -104,18 +109,22 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            @auth
-
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                    {{ __('Dashboard') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('product.create')" :active="request()->routeIs('product.create')">
-                    {{ __('Add Product') }}
-                </x-responsive-nav-link>
-            @endauth
             <x-responsive-nav-link :href="route('product.index')" :active="request()->routeIs('product.index')">
                 {{ __('Product') }}
             </x-responsive-nav-link>
+            @auth
+                @if (Auth::user()->is_admin)
+                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                        {{ __('Dashboard') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('product.create')" :active="request()->routeIs('product.create')">
+                        {{ __('Add Product') }}
+                    </x-responsive-nav-link>
+                @endif
+                <x-responsive-nav-link :href="route('order.index')" :active="request()->routeIs('order.index')">
+                    {{ __((auth()->user()->is_admin ? '' : 'My ') . 'Order') }}
+                </x-responsive-nav-link>
+            @endauth
         </div>
 
         <!-- Responsive Settings Options -->
@@ -132,9 +141,11 @@
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('cart.index')">
-                    {{ __('Your Cart') }}
-                </x-responsive-nav-link>
+                @if (Auth::check() && !Auth::user()->is_admin)
+                    <x-responsive-nav-link :href="route('cart.index')">
+                        {{ __('My Cart') }}
+                    </x-responsive-nav-link>
+                @endif
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">

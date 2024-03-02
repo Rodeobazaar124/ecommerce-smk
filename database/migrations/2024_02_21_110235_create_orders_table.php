@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->boolean('status')->default(0);
+            $table->enum('status', ['paid', 'unpaid', 'rejected'])->default('unpaid');
             $table->string('receipt')->nullable();
             $table->foreignIdFor(User::class)->constrained()->cascadeOnDelete()->cascadeOnUpdate();
             $table->timestamps();

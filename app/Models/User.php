@@ -1,6 +1,6 @@
 <?php
-namespace App\Models;
 
+namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -22,7 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'is_admin'
+        'is_admin',
     ];
 
     /**
@@ -45,11 +45,8 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-
     /**
      * Get all of the orders for the User
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function orders(): HasMany
     {
@@ -58,8 +55,6 @@ class User extends Authenticatable
 
     /**
      * Get all of the carts for the User
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function carts(): HasMany
     {

@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Order;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Cart;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -21,11 +21,12 @@ class OrderController extends Controller
     public function index()
     {
         $orders = [];
-        if (Auth::user()->is_admin){
+        if (Auth::user()->is_admin) {
             $orders = Order::all();
         } else {
             $orders = Order::where('user_id', Auth::user()->id)->get();
         }
+
         return view('order.index', compact('orders'));
     }
 
@@ -40,20 +41,21 @@ class OrderController extends Controller
             return Redirect::back();
         }
         $order = Order::create([
-            'user_id' => $user_id
+            'user_id' => $user_id,
         ]);
         foreach ($carts as $cart) {
             $product = Product::find($cart->product_id);
             $product->update([
-                'stock' => $product->stock - $cart->amount
+                'stock' => $product->stock - $cart->amount,
             ]);
             Transaction::create([
                 'amount' => $cart->amount,
                 'order_id' => $order->id,
-                'product_id' => $cart->product_id
+                'product_id' => $cart->product_id,
             ]);
             $cart->delete();
         }
+
         return Redirect::back();
     }
 
@@ -68,24 +70,25 @@ class OrderController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Order $order){
+    public function show(Order $order)
+    {
         return view('order.show', compact('order'));
-        }
+    }
+
     /**
      * Display the specified resource.
      */
     public function store_receipt(Order $order, Request $request)
     {
         $file = $request->file('payment_receipt');
-        $path = time() . '_' . $order->id . '.' . $file->getClientOriginalExtension();
-        Storage::disk('local')->put('public/' . $path, $file->getContent());
+        $path = time().'_'.$order->id.'.'.$file->getClientOriginalExtension();
+        Storage::disk('local')->put('public/'.$path, $file->getContent());
         $order->update([
-            'receipt' => $path
+            'receipt' => $path,
         ]);
+
         return Redirect::back();
     }
-
-
 
     /**
      * Show the form for editing the specified resource.
@@ -114,8 +117,23 @@ class OrderController extends Controller
     public function confirm_payment(Order $order)
     {
         $order->update([
-            'is_paid' => true
+            'status' => 'paid',
         ]);
+
         return Redirect::back();
+    }
+
+    public function reject_payment(Order $order)
+    {
+        $order->status = 'rejected';
+        $order->receipt = null;
+        $order->updateOrFail();
+
+        return Redirect::back();
+    }
+
+    public function nota(Order $order)
+    {
+        return view('order.nota', compact('order'));
     }
 }
