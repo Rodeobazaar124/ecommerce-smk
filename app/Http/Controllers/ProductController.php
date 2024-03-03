@@ -19,13 +19,12 @@ class ProductController extends Controller
      *
      * @return view
      */
-
     public function index()
     {
         $products = [];
         if (request('query') && request('query') !== null) {
             $query = request('query');
-            $products = Product::where('name', 'like', '%' . $query . '%')->orWhere('price', 'like', '%' . $query . '%')->orWhere('description', 'like', '%' . $query . '%')->paginate(8);
+            $products = Product::where('name', 'like', '%'.$query.'%')->orWhere('price', 'like', '%'.$query.'%')->orWhere('description', 'like', '%'.$query.'%')->paginate(8);
         } else {
             $products = Product::paginate(8);
         }
@@ -63,19 +62,19 @@ class ProductController extends Controller
         // Simpan file kedalam sebuah variabel
         $file = $request->file('image');
         // Buat nama file baru berdasarkan timestamps
-        $data['image'] = time() . '_' . Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
+        $data['image'] = time().'_'.Str::slug($request->name).'.'.$file->getClientOriginalExtension();
         // Simpan file dengan nama yang telah ditentukan
-        Storage::disk('local')->put('public/product/' . $data['image'], $file->getContent());
+        Storage::disk('local')->put('public/product/'.$data['image'], $file->getContent());
         // Simpan data yang sudah di validasi ke database
         Product::create($data);
+
         // Alihkan user/admin ke halaman home
-        return Redirect::route('product.index')->with(['success' => 'Produk ' . $data['name'] . ' berhasil ditambahkan']);
+        return Redirect::route('product.index')->with(['success' => 'Produk '.$data['name'].' berhasil ditambahkan']);
     }
 
     /**
      * Menampilkan suatu produk
      *
-     * @param Product $product
      * @return view
      */
     public function show(Product $product)
@@ -86,7 +85,6 @@ class ProductController extends Controller
     /**
      * Tampilkan halaman edit product dengan mengirimkan data product sebelumnya
      *
-     * @param Product $product
      * @return view
      */
     public function edit(Product $product)
@@ -94,12 +92,6 @@ class ProductController extends Controller
         return view('product.edit', compact('product'));
     }
 
-    /**
-     *
-     *
-     * @param UpdateProductRequest $request
-     * @param Product $product
-     */
     public function update(UpdateProductRequest $request, Product $product)
     {
         // Validasi data yang dikirimkan kemudian simpan kedalam variable
@@ -115,14 +107,15 @@ class ProductController extends Controller
             // simpan file ke variable
             $file = $request->file('image');
             // buat nama file unik berdasarkan timestamps
-            $new_data['image'] = time() . '_' . Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
+            $new_data['image'] = time().'_'.Str::slug($request->name).'.'.$file->getClientOriginalExtension();
             // Simpan gambar ke local disk
-            Storage::disk('local')->put('public/product/' . $new_data['image'], $file->getContent());
+            Storage::disk('local')->put('public/product/'.$new_data['image'], $file->getContent());
             // Hapus gambar lama
             Storage::delete($product->image);
         }
         // Update data product
         $product->update($new_data);
+
         // Alihkan ke halaman show product
         return Redirect::route('product.show', $product->id)->with(['success' => "Produk {$new_data['name']} berhasil diubah"]);
     }
@@ -130,7 +123,6 @@ class ProductController extends Controller
     /**
      * Menghapus product dari database dan local disk
      *
-     * @param Product $product
      * @return Redirect
      */
     public function destroy(Product $product)

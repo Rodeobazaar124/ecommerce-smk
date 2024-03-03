@@ -22,9 +22,6 @@ class CartController extends Controller
 
     /**
      * Menambahkan produk ke cart
-     *
-     * @param Product $product
-     * @param Request $request
      */
     public function addToCart(Product $product, Request $request)
     {
@@ -43,7 +40,7 @@ class CartController extends Controller
 
         if ($existing_cart === null) {
             $request->validate([
-                'amount' => 'required|gte:1|lte:' . $product->stock,
+                'amount' => 'required|gte:1|lte:'.$product->stock,
             ]);
 
             // Buat cart baru dengan id user dan id product yang beserta amount yang sudah disesuaikan
@@ -55,7 +52,7 @@ class CartController extends Controller
         } else {
             // Validasi amount dan pastikan tidak lebih dari stok
             $request->validate([
-                'amount' => 'required|gte:1|lte:' . ($product->stock -
+                'amount' => 'required|gte:1|lte:'.($product->stock -
                     $existing_cart->amount),
             ]);
             // ubah amount cart yang sudah ada
@@ -63,10 +60,10 @@ class CartController extends Controller
                 'amount' => $existing_cart->amount + $request->amount,
             ]);
         }
+
         // Redirect user ke halaman cart
         return Redirect::route('cart.index');
     }
-
 
     /**
      * Update the specified resource in storage.
@@ -74,7 +71,7 @@ class CartController extends Controller
     public function update_cart(Cart $cart, Request $request)
     {
         $request->validate([
-            'amount' => 'required|gte:1|lte:' . $cart->product->stock,
+            'amount' => 'required|gte:1|lte:'.$cart->product->stock,
         ]);
         $cart->update([
             'amount' => $request->amount,
@@ -85,11 +82,11 @@ class CartController extends Controller
 
     /**
      * Menghapus keranjang user berdsarkan permintaan yang sudah dikirimkan
-     * @param Cart $cart
      */
     public function destroy(Cart $cart)
     {
         $cart->delete();
+
         // Arahkan user kembali ke halaman sebelumnya
         return Redirect::back()->with(['success' => 'Produk berhasil dihapus dari keranjang']);
     }

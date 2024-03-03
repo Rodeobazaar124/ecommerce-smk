@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StoreOrderRequest;
-use App\Http\Requests\UpdateOrderRequest;
 use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
@@ -72,13 +70,13 @@ class OrderController extends Controller
             // Hapus keranjang nya
             $cart->delete();
         }
+
         // Kembali ke halaman sebelumnya (cart)
         return Redirect::back();
     }
+
     /**
      * Menampilkan halaman suatu order. Berdasarkan params $order yang diberikan
-     *
-     * @param Order $order
      */
     public function show(Order $order)
     {
@@ -87,23 +85,20 @@ class OrderController extends Controller
 
     /**
      * Digunakan untuk menyimpan bukti pembayaran milik user
-     *
-     * @param Order $order
-     * @param Request $request
      */
     public function store_receipt(Order $order, Request $request)
     {
         // Validasi apakah user sudah mengirimi file?
         $request->validate([
-            'payment_receipt' => 'required|image'
+            'payment_receipt' => 'required|image',
         ]);
 
         // Simpan file yang diberikan user kedalam variable
         $file = $request->file('payment_receipt');
         // Buat nama file unik berdasarkan timestamps
-        $filename = time() . '_' . $order->id . '.' . $file->getClientOriginalExtension();
+        $filename = time().'_'.$order->id.'.'.$file->getClientOriginalExtension();
         // Simpan file ke disk drive
-        Storage::disk('local')->put('public/' . $filename, $file->getContent());
+        Storage::disk('local')->put('public/'.$filename, $file->getContent());
         // update order yang ada dengan menambahkan nama file receipt yang baru
         $order->update([
             'receipt' => $filename,
@@ -111,12 +106,12 @@ class OrderController extends Controller
 
         return Redirect::back();
     }
+
     /**
      * Fungsi yang digunakan untuk mengubah status order
      *
      * Digunakan untuk mengubah status order menjadi paid (sudah dibayar)
      *
-     * @param Order $order
      * @return Redirect
      */
     public function confirm_payment(Order $order)
@@ -127,12 +122,12 @@ class OrderController extends Controller
 
         return Redirect::back();
     }
+
     /**
      * Fungsi yang digunakan untuk mengubah status order
      *
      * Digunakan untuk mengubah status order menjadi ditolak (rejected)
      *
-     * @param Order $order
      * @return Redirect
      */
     public function reject_payment(Order $order)
@@ -149,7 +144,6 @@ class OrderController extends Controller
      *
      * Fungsi ini digunakan untuk mencetak nota pembayaran dari produk yang telah dibayar
      *
-     * @param Order $order
      * @return View order.nota
      */
     public function nota(Order $order)
