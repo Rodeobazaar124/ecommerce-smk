@@ -14,7 +14,9 @@
                                     </a>
                                     <h6 class="text-gray-600">By {{ $order->user->name }}</h6>
 
-                                    <p class="text-red-500">{{ $order->status }}</p>
+                                    <p
+                                        class="font-semibold {{ $order->status === 'paid' ? 'text-green-600' : 'text-red-600' }}">
+                                        {{ ucfirst($order->status) }}</p>
                                     @if ($order->status !== 'paid')
                                         @if ($order->payment_receipt)
                                             <div class="flex justify-between mt-2">
@@ -29,8 +31,11 @@
 
                                     <div class="flex gap-2 my-1 flex-col">
                                         @if (Auth::user()->is_admin)
-                                            <a href="{{ Storage::url($order->receipt) }}"><x-primary-button> See Payment
-                                                    Receipt</x-primary-button></a>
+                                            @if ($order->receipt)
+                                                <a href="{{ Storage::url($order->receipt) }}"><x-primary-button> See
+                                                        Payment
+                                            @endif
+                                            Receipt</x-primary-button></a>
                                             <div class="flex gap-2">
                                                 <form action="{{ route('confirm_payment', $order) }}" method="post">
                                                     @csrf
