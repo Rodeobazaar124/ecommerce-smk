@@ -44,7 +44,7 @@
                             <td class="text-left py-3 px-4"><x-idr :value="$product->price" /></td>
                             <td class="py-3 px-4">{{ $product->stock }}</td>
                             <td class="py-3 px-4">
-                                <form action="{{ route('product.destroy', $product->id) }}" method="POST" class="flex gap-2">
+                                <form onsubmit="return confirm('Apakah anda yakin ingin menghapus produk *{{$product->name}}*?')" action="{{ route('product.destroy', $product->id) }}" method="POST" class="flex gap-2">
                                     @csrf
                                     @method('DELETE')
                                     <x-primary-button type="button">

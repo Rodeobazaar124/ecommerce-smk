@@ -4,6 +4,8 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProfileController;
+use App\Models\Order;
+use App\Models\Product;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -19,17 +21,20 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [ProductController::class, 'index'])->name('product.index');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 // Can be accessed only by admin
 Route::middleware(['auth', 'admin'])->group(function () {
+
+    Route::get('/dashboard', function () {
+        $product = Product::count();
+        $order = Order::count();
+        return view('dashboard', compact('order', 'product'));
+    })->name('dashboard');
     // Product Routes
     Route::get('/product/create', [ProductController::class, 'create'])->name('product.create');
     Route::post('/product/create', [ProductController::class, 'store'])->name('product.store');
     Route::get('/product/{product}/edit', [ProductController::class, 'edit'])->name('product.edit');
-    Route::get('/product/{product}/update', [ProductController::class, 'update'])->name('product.update');
+    Route::patch('/product/{product}/update', [ProductController::class, 'update'])->name('product.update');
 
     Route::delete('/product/{product}/delete', [ProductController::class, 'destroy'])->name('product.destroy');
     // Order Routes
@@ -54,9 +59,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/order/{order}', [OrderController::class, 'show'])->name('show_order');
     Route::get('/order/nota/{order}', [OrderController::class, 'nota'])->name('nota');
     Route::get('/order', [OrderController::class, 'index'])->name('order.index');
-    // Product Routes
-
-    Route::get('/product/{product}', [ProductController::class, 'show'])->name('product.show');
 });
+// Product Routes
+Route::get('/product/{product}', [ProductController::class, 'show'])->name('product.show');
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

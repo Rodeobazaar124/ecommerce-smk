@@ -46,10 +46,15 @@
                         @endforeach
                     </div>
                     <div class="mb-1">
-                        @if ($total_price >= 50000)
+                        @if ($total_price > 200000 && $total_price < 500000)
                             @php
                                 $discount = 0.1 * $total_price;
                                 $disc = '10%';
+                            @endphp
+                        @elseif ($total_price >= 500000)
+                            @php
+                                $discount = 0.2 * $total_price;
+                                $disc = '20%';
                             @endphp
                         @else
                             @php
@@ -78,8 +83,7 @@
                                 <input type="file" name="payment_receipt"
                                     class="w-full p-2 border border-gray-300 rounded">
                             </div>
-                            <button type="submit"
-                                class="w-full px-3 py-2 text-white bg-gray-950 rounded">Submit
+                            <button type="submit" class="w-full px-3 py-2 text-white bg-gray-950 rounded">Submit
                                 payment</button>
                         </form>
                     @endif

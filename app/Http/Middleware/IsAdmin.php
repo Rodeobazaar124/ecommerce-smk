@@ -18,7 +18,7 @@ class IsAdmin
     public function handle(Request $request, Closure $next): Response
     {
         if (! Auth::check() || Auth::user()->is_admin == false) {
-            return Redirect::route('home');
+            return Redirect::route('product.index');
         }
 
         return $next($request);

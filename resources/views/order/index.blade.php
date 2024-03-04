@@ -4,13 +4,13 @@
             <div class="w-full md:w-8/12">
                 <x-card>
                     <div class="text-lg font-semibold dark:text-white">{{ __('Orders') }}</div>
-                    <div class="mt-4">
+                    <div class="gap-2">
                         @foreach ($orders as $order)
-                            <div class="mb-2 w-96">
+                            <div class="mb-2">
                                 <div class="p-4 border border-gray-300 w-full dark:border-gray-600 rounded">
                                     <a href="{{ route('show_order', $order) }}">
                                         <h5 class="text-xl font-semibold dark:text-white">Order
-                                            #{{ $order->id . '_' . $order->created_at->format('dmY') }}</h5>
+                                            #{{ $order->id}}</h5>
                                     </a>
                                     <h6 class="text-gray-600">By {{ $order->user->name }}</h6>
 
@@ -55,8 +55,8 @@
                                     </div>
                                 </div>
                             </div>
+                        @endforeach
                     </div>
-                    @endforeach
             </div>
             </x-card>
         </div>

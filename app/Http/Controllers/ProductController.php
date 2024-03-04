@@ -35,7 +35,6 @@ class ProductController extends Controller
 
         return view('product.index_user', compact('products'));
 
-        // return view('bootstrap.product.index', compact('products'));
     }
 
     /**
@@ -54,7 +53,7 @@ class ProductController extends Controller
         // Validasi apakah semua data sudah diisi
         $data = $request->validate([
             'name' => 'required',
-            'price' => 'required|number',
+            'price' => 'required|numeric',
             'stock' => 'required',
             'description' => 'required',
             'image' => 'required|image',
@@ -64,7 +63,7 @@ class ProductController extends Controller
         // Buat nama file baru berdasarkan timestamps
         $data['image'] = time().'_'.Str::slug($request->name).'.'.$file->getClientOriginalExtension();
         // Simpan file dengan nama yang telah ditentukan
-        Storage::disk('local')->put('public/product/'.$data['image'], $file->getContent());
+        Storage::disk('local')->put('public/'.$data['image'], $file->getContent());
         // Simpan data yang sudah di validasi ke database
         Product::create($data);
 
@@ -73,7 +72,7 @@ class ProductController extends Controller
     }
 
     /**
-     * Menampilkan suatu produk
+     * Menampilkan view show product dari suatu produk berdasarkan variabel $product
      *
      * @return view
      */
@@ -109,7 +108,7 @@ class ProductController extends Controller
             // buat nama file unik berdasarkan timestamps
             $new_data['image'] = time().'_'.Str::slug($request->name).'.'.$file->getClientOriginalExtension();
             // Simpan gambar ke local disk
-            Storage::disk('local')->put('public/product/'.$new_data['image'], $file->getContent());
+            Storage::disk('local')->put('public/'.$new_data['image'], $file->getContent());
             // Hapus gambar lama
             Storage::delete($product->image);
         }

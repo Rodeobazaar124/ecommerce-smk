@@ -12,45 +12,45 @@
 
     <?php
     $style = '
-                    <style>
-                        * {
-                            font-family: "consolas", sans-serif;
-                        }
-                        p {
-                            display: block;
-                            margin: 3px;
-                            font-size: 10pt;
-                        }
-                        table td {
-                            font-size: 9pt;
-                        }
-                        .text-center {
-                            text-align: center;
-                        }
-                        .text-right {
-                            text-align: right;
-                        }
+                        <style>
+                            * {
+                                font-family: "consolas", sans-serif;
+                            }
+                            p {
+                                display: block;
+                                margin: 3px;
+                                font-size: 10pt;
+                            }
+                            table td {
+                                font-size: 9pt;
+                            }
+                            .text-center {
+                                text-align: center;
+                            }
+                            .text-right {
+                                text-align: right;
+                            }
 
-                        @media print {
-                            @page {
-                                margin: 0;
-                                size: 75mm
-                    ';
+                            @media print {
+                                @page {
+                                    margin: 0;
+                                    size: 75mm
+                        ';
     ?>
     <?php
     $style .= !empty($_COOKIE['innerHeight']) ? $_COOKIE['innerHeight'] . 'mm; }' : '}';
     ?>
     <?php
     $style .= '
-                            html, body {
-                                width: 70mm;
+                                html, body {
+                                    width: 70mm;
+                                }
+                                .btn-print {
+                                    display: none;
+                                }
                             }
-                            .btn-print {
-                                display: none;
-                            }
-                        }
-                    </style>
-                    ';
+                        </style>
+                        ';
     ?>
 
     {!! $style !!}
@@ -59,8 +59,8 @@
 <body onload="window.print()">
     <button class="btn-print" style="position: absolute; right: 1rem; top: rem;" onclick="window.print()">Print</button>
     <div class="text-center">
-        <h3 style="margin-bottom: 5px;">{{config('app.name')}}</h3>
-        <p>{{fake()->address()}}</p>
+        <h3 style="margin-bottom: 5px;">{{ config('app.name') }}</h3>
+        <p>{{ fake()->address() }}</p>
     </div>
     <br>
     <div>
@@ -88,10 +88,15 @@
     <p class="text-center">-----------------------------------</p>
 
     <table width="100%" style="border: 0;">
-        @if ($total_price >= 50000)
+        @if ($total_price > 200000 && $total_price < 500000)
             @php
                 $discount = 0.1 * $total_price;
                 $disc = '10%';
+            @endphp
+        @elseif ($total_price >= 500000)
+            @php
+                $discount = 0.2 * $total_price;
+                $disc = '20%';
             @endphp
         @else
             @php

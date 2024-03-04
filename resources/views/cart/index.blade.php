@@ -70,10 +70,15 @@
         </x-card>
         @if (!$carts->isEmpty())
             <x-card>
-                @if ($total_price >= 50000)
+                @if ($total_price > 200000 && $total_price < 500000)
                     @php
                         $discount = 0.1 * $total_price;
                         $disc = '10%';
+                    @endphp
+                @elseif ($total_price >= 500000)
+                    @php
+                        $discount = 0.2 * $total_price;
+                        $disc = '20%';
                     @endphp
                 @else
                     @php

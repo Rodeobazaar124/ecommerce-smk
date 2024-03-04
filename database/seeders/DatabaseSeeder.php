@@ -22,6 +22,10 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('sandi'),
             'is_admin' => true,
         ]);
+
+
+
+
         \App\Models\User::factory()->create([
             'name' => 'Muhammad azfa',
             'email' => 'azfasa15@gmail.com',
@@ -47,5 +51,7 @@ class DatabaseSeeder extends Seeder
                 'stock' => fake()->numberBetween(1, 1000),
             ]);
         }
+        \App\Models\Product::factory(25)->create();
+
     }
 }

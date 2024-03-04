@@ -102,6 +102,7 @@ class OrderController extends Controller
         // update order yang ada dengan menambahkan nama file receipt yang baru
         $order->update([
             'receipt' => $filename,
+            'status' => 'únpaid'
         ]);
 
         return Redirect::back();
