@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\MarketplaceJob;
 use App\Jobs\ProductJob;
 use App\Models\Category;
 use App\Models\Product;
@@ -11,6 +12,20 @@ use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
+    public function uploadViaMarketplace(Request $request)
+    {
+        //VALIDASI INPUTAN
+        $this->validate($request, [
+            'marketplace' => 'required|string',
+            'username' => 'required|string'
+        ]);
+
+        MarketplaceJob::dispatch($request->username, 10); //BUAT JOBS QUEUE
+        //PARAMETER PERTAMA ADALAH USERNAME TOKO PADA MARKETPLACE
+        //PARAMETER KEDUA ADALAH JUMLAH PRODUK YANG AKAN AMBIL DALAM SEKALI PROSES
+        //SAYA SARANKAN MENGGUNAKAN VALUE 10 UNTUK MEMPERCEPAT PROSES
+        return redirect()->back()->with(['success' => 'Produk Dalam Antrian']);
+    }
     public function index()
     {
         $product = Product::with(['category'])->orderBy('created_at', 'DESC');

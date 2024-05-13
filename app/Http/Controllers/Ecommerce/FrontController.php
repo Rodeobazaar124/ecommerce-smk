@@ -5,12 +5,29 @@ namespace App\Http\Controllers\Ecommerce;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Customer;
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Province;
 use Illuminate\Http\Request;
 
 class FrontController extends Controller
 {
+    public function referalProduct($user, $product)
+    {
+        $code = $user . '-' . $product; //KITA MERGE USERID DAN PRODUCTID
+        $product = Product::find($product); //FIND PRODUCT BERDASARKAN PRODUCTID
+        $cookie = cookie('dw-afiliasi', json_encode($code), 2880); //BUAT COOKIE DENGAN NAMA DW-AFILIASI DAN VALUENYA ADALAH CODE YANG SUDAH DI-MERGE
+        //KEMUDIAN REDIRECT KE HALAMAN SHOW PRODUCT DAN MENGIRIMKAN COOKIE KE BROWSER
+        return redirect(route('front.show_product', $product->slug))->cookie($cookie);
+    }
+    public function listCommission()
+    {
+        $user = auth()->guard('customer')->user(); //AMBIL DATA USER YANG LOGIN
+        //QUERY BERDASARKAN ID USER DARI DATA REF YANG ADA DIORDER DENGAN STATUS 4 ATAU SELESAI
+        $orders = Order::where('ref', $user->id)->where('status', 4)->paginate(10);
+        //LOAD VIEW AFFILIATE.BLADE.PHP DAN PASSING DATA ORDERS
+        return view('ecommerce.affiliate', compact('orders'));
+    }
     public function index()
     {
         $products = Product::orderBy('created_at', 'DESC')->paginate(10);
@@ -51,21 +68,21 @@ class FrontController extends Controller
         return view('ecommerce.setting', compact('customer', 'provinces'));
     }
     public function customerUpdateProfile(Request $request)
-{
-    $this->validate($request, [
-        'name' => 'required|string|max:100',
-        'phone_number' => 'required|max:15',
-        'address' => 'required|string',
-        'district_id' => 'required|exists:districts,id',
-        'password' => 'nullable|string|min:6'
-    ]);
+    {
+        $this->validate($request, [
+            'name' => 'required|string|max:100',
+            'phone_number' => 'required|max:15',
+            'address' => 'required|string',
+            'district_id' => 'required|exists:districts,id',
+            'password' => 'nullable|string|min:6'
+        ]);
 
-    $user = auth()->guard('customer')->user();
-    $data = $request->only('name', 'phone_number', 'address', 'district_id');
-    if ($request->password != '') {
-        $data['password'] = $request->password;
+        $user = auth()->guard('customer')->user();
+        $data = $request->only('name', 'phone_number', 'address', 'district_id');
+        if ($request->password != '') {
+            $data['password'] = $request->password;
+        }
+        $user->update($data);
+        return redirect()->back()->with(['success' => 'Profil berhasil diperbaharui']);
     }
-    $user->update($data);
-    return redirect()->back()->with(['success' => 'Profil berhasil diperbaharui']);
-}
 }

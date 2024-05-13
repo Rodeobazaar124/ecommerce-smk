@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('tracking_number')->nullable()->after('status');
+            $table->string('ref')->nullable()->after('tracking_number');
+            $table->boolean('ref_status')->default(false)->after('ref');
         });
     }
 
@@ -22,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->dropColumn('tracking_number');
+            $table->dropColumn('ref');
+            $table->dropColumn('ref_status');
         });
     }
 };

@@ -11,13 +11,41 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Models\Province;
+use GuzzleHttp\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class CartController extends Controller
 {
+    public function getCourier(Request $request)
+    {
+        $this->validate($request, [
+            'destination' => 'required',
+            'weight' => 'required|integer'
+        ]);
+
+        //MENGIRIM PERMINTAAN KE API RUANGAPI UNTUK MENGAMBIL DATA ONGKOS KIRIM
+        //BACA DOKUMENTASI UNTUK PENJELASAN LEBIH LANJUT
+        $url = 'https://ruangapi.com/api/v1/shipping';
+        $client = new Client();
+        $response = $client->request('POST', $url, [
+            'headers' => [
+                'Authorization' => 'API KEY ANDA'
+            ],
+            'form_params' => [
+                'origin' => 22, //ASAL PENGIRIMAN, 22 = BANDUNG
+                'destination' => $request->destination,
+                'weight' => $request->weight,
+                'courier' => 'jne,jnt' //MASUKKAN KEY KURIR LAINNYA JIKA INGIN MENDAPATKAN DATA ONGKIR DARI KURIR YANG LAIN
+            ]
+        ]);
+
+        $body = json_decode($response->getBody(), true);
+        return $body;
+    }
     public function addToCart(Request $request)
     {
         $this->validate($request, [
@@ -35,12 +63,14 @@ class CartController extends Controller
                 'product_id' => $product->id,
                 'product_name' => $product->name,
                 'product_price' => $product->price,
-                'product_image' => $product->image
+                'product_image' => $product->image,
+                'weight' => $product->weight //TAMBAHKAN BERAT KE DALAM COOKIE
             ];
         }
 
-        $cookie = cookie('carts', json_encode($carts), 2880);
-        return redirect()->back()->cookie($cookie);
+        $cookie = cookie('dw-carts', json_encode($carts), 2880);
+        //KITA JUGA MENAMBAHKAN FLASH MESSAGE UNTUK NOTIFIKASI PRODUK DIMASUKKAN KE KERANJANG
+        return redirect()->back()->with(['success' => 'Produk Ditambahkan ke Keranjang'])->cookie($cookie);
     }
     public function listCart()
     {
@@ -76,7 +106,12 @@ class CartController extends Controller
         $subtotal = collect($carts)->sum(function ($q) {
             return $q['qty'] * $q['product_price'];
         });
-        return view('ecommerce.checkout', compact('provinces', 'carts', 'subtotal'));
+        //TAMBAHKAN FUNGSI UNTUK MENGHITUNG BERAT BARANG
+        $weight = collect($carts)->sum(function ($q) {
+            return $q['qty'] * $q['weight'];
+        });
+        //JANGAN LUPA PASSING KE VIEW
+        return view('ecommerce.checkout', compact('provinces', 'carts', 'subtotal', 'weight'));
     }
     public function getCity()
     {
@@ -98,13 +133,20 @@ class CartController extends Controller
             'customer_address' => 'required|string',
             'province_id' => 'required|exists:provinces,id',
             'city_id' => 'required|exists:cities,id',
-            'district_id' => 'required|exists:districts,id'
+            'district_id' => 'required|exists:districts,id',
+            'courier' => 'required' //TAMBAHKAN VALIDASI KURIR
         ]);
 
         DB::beginTransaction();
         try {
+            //TAMBAHKAN DUA BARI CODE INI
+            //GET COOKIE DARI BROWSER
+            $affiliate = json_decode(request()->cookie('dw-afiliasi'), true);
+            //EXPLODE DATA COOKIE UNTUK MEMISAHKAN USERID DAN PRODUCTID
+            $explodeAffiliate = explode('-', $affiliate);
+
             $customer = Customer::where('email', $request->email)->first();
-            if (!auth()->check() && $customer) {
+            if (!auth()->guard('customer')->check() && $customer) {
                 return redirect()->back()->with(['error' => 'Silahkan Login Terlebih Dahulu']);
             }
 
@@ -112,18 +154,22 @@ class CartController extends Controller
             $subtotal = collect($carts)->sum(function ($q) {
                 return $q['qty'] * $q['product_price'];
             });
-            $password = Str::random(8);
-            $customer = Customer::create([
-                'name' => $request->customer_name,
-                'email' => $request->email,
-                'password' => $password,
-                'phone_number' => $request->customer_phone,
-                'address' => $request->customer_address,
-                'district_id' => $request->district_id,
-                'activate_token' => Str::random(30),
-                'status' => false
-            ]);
 
+            if (!auth()->guard('customer')->check()) {
+                $password = Str::random(8);
+                $customer = Customer::create([
+                    'name' => $request->customer_name,
+                    'email' => $request->email,
+                    'password' => $password,
+                    'phone_number' => $request->customer_phone,
+                    'address' => $request->customer_address,
+                    'district_id' => $request->district_id,
+                    'activate_token' => Str::random(30),
+                    'status' => false
+                ]);
+            }
+
+            $shipping = explode('-', $request->courier); //EXPLODE DATA KURIR, KARENA FORMATNYA, NAMAKURIR-SERVICE-COST
             $order = Order::create([
                 'invoice' => Str::random(4) . '-' . time(),
                 'customer_id' => $customer->id,
@@ -131,8 +177,12 @@ class CartController extends Controller
                 'customer_phone' => $request->customer_phone,
                 'customer_address' => $request->customer_address,
                 'district_id' => $request->district_id,
-                'subtotal' => $subtotal
+                'subtotal' => $subtotal,
+                'cost' => $shipping[2], //SIMPAN INFORMASI BIAYA ONGKIRNYA PADA INDEX 2
+                'shipping' => $shipping[0] . '-' . $shipping[1], //SIMPAN NAMA KURIR DAN SERVICE YANG DIGUNAKAN
+                'ref' => $affiliate != '' && $explodeAffiliate[0] != auth()->guard('customer')->user()->id ? $affiliate : NULL
             ]);
+            //CODE DIATAS MELAKUKAN PENGECEKAN JIKA USERID NYA BUKAN DIRINYA SENDIRI, MAKA AFILIASINYA DISIMPAN
 
             foreach ($carts as $row) {
                 $product = Product::find($row['product_id']);
@@ -148,9 +198,13 @@ class CartController extends Controller
             DB::commit();
 
             $carts = [];
-            $cookie = cookie('carts', json_encode($carts), 2880);
+            $cookie = cookie('dw-carts', json_encode($carts), 2880);
+            //KEMUDIAN HAPUS DATA COOKIE AFILIASI
+            Cookie::queue(Cookie::forget('dw-afiliasi'));
 
-            Mail::to($request->email)->send(new CustomerRegisterMail($customer, $password)); //TAMBAHKAN CODE INI SAJA
+            if (!auth()->guard('customer')->check()) {
+                Mail::to($request->email)->send(new CustomerRegisterMail($customer, $password));
+            }
             return redirect(route('front.finish_checkout', $order->invoice))->cookie($cookie);
         } catch (\Exception $e) {
             DB::rollback();

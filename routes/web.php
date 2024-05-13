@@ -32,14 +32,20 @@ Route::group(['prefix' => 'member', 'namespace' => 'Ecommerce'], function () {
 });
 Route::group(['middleware' => 'customer'], function () {
     Route::get('setting', [FrontController::class, 'customerSettingForm'])->name('customer.settingForm');
+    Route::get('/afiliasi', [FrontController::class, 'listCommission'])->name('customer.affiliate');
     Route::post('setting', [FrontController::class, 'customerUpdateProfile'])->name('customer.setting');
     Route::get('dashboard', [LoginController::class, 'dashboard'])->name('customer.dashboard');
     Route::get('logout', [LoginController::class, 'logout'])->name('customer.logout');
+    Route::post('orders/accept', [OrderController::class, 'acceptOrder'])->name('customer.order_accept');
+    Route::get('orders/return/{invoice}', [OrderController::class, 'returnForm'])->name('customer.order_return');
+    Route::put('orders/return/{invoice}', [OrderController::class, 'processReturn'])->name('customer.return');
 });
 
 
 Auth::routes();
 Route::group(['prefix' => 'administrator', 'middleware' => 'auth'], function () {
+    Route::post('/product/marketplace', 'ProductController@uploadViaMarketplace')->name('product.marketplace');
+
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::resource('category', CategoryController::class)->except(['create', 'show']);
     Route::resource('product', ProductController::class)->except(['show']);
@@ -49,8 +55,11 @@ Route::group(['prefix' => 'administrator', 'middleware' => 'auth'], function () 
         Route::get('/', [OrderController::class, 'index'])->name('orders.index');
         Route::delete('/{id}', [OrderController::class, 'destroy'])->name('orders.destroy');
         Route::get('/{invoice}', [OrderController::class, 'view'])->name('orders.view');
+        Route::get('/payment/{invoice}', [OrderController::class, 'acceptPayment'])->name('orders.approve_payment');
+        Route::post('/shipping', [OrderController::class, 'shippingOrder'])->name('orders.shipping');
+        Route::get('/return/{invoice}', [OrderController::class, 'return'])->name('orders.return');
+        Route::post('/return', [OrderController::class, 'approveReturn'])->name('orders.approve_return');
     });
-    Route::get('/payment/{invoice}', [OrderController::class, 'acceptPayment'])->name('orders.approve_payment');
 });
 
 Route::group(['prefix' => 'reports'], function () {
@@ -59,7 +68,7 @@ Route::group(['prefix' => 'reports'], function () {
     Route::get('/return', [HomeController::class, 'returnReport'])->name('report.return');
     Route::get('/return/pdf/{daterange}', [HomeController::class, 'returnReportPdf'])->name('report.return_pdf');
 });
-
+Route::get('/product/ref/{user}/{product}', [FrontController::class, 'referalProduct'])->name('front.afiliasi');
 Route::get('/test/mail/send', function () {
     return Mail::to('azfasa15@gmail.com')->send(new TestMail());
 });

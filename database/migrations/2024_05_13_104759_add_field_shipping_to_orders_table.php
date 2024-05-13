@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('tracking_number')->nullable()->after('status');
+            $table->integer('cost')->after('subtotal')->default(0);
+            $table->string('shipping')->after('cost')->nullable();
         });
     }
 
@@ -22,7 +23,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->dropColumn('tracking_number');
+            $table->dropColumn('cost');
+            $table->dropColumn('shipping');
         });
     }
 };
