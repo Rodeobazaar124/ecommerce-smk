@@ -29,17 +29,17 @@ class CartController extends Controller
 
         //MENGIRIM PERMINTAAN KE API RUANGAPI UNTUK MENGAMBIL DATA ONGKOS KIRIM
         //BACA DOKUMENTASI UNTUK PENJELASAN LEBIH LANJUT
-        $url = 'https://ruangapi.com/api/v1/shipping';
+        $url = 'https://api.rajaongkir.com/starter/cost';
         $client = new Client();
         $response = $client->request('POST', $url, [
             'headers' => [
-                'Authorization' => 'API KEY ANDA'
+                'key' => config('app.rajaongkir_api_key')
             ],
             'form_params' => [
                 'origin' => 22, //ASAL PENGIRIMAN, 22 = BANDUNG
                 'destination' => $request->destination,
                 'weight' => $request->weight,
-                'courier' => 'jne,jnt' //MASUKKAN KEY KURIR LAINNYA JIKA INGIN MENDAPATKAN DATA ONGKIR DARI KURIR YANG LAIN
+                'courier' => 'jne' //MASUKKAN KEY KURIR LAINNYA JIKA INGIN MENDAPATKAN DATA ONGKIR DARI KURIR YANG LAIN
             ]
         ]);
 
@@ -64,11 +64,11 @@ class CartController extends Controller
                 'product_name' => $product->name,
                 'product_price' => $product->price,
                 'product_image' => $product->image,
-                'weight' => $product->weight //TAMBAHKAN BERAT KE DALAM COOKIE
+                'weight' => $product->weight
             ];
         }
 
-        $cookie = cookie('dw-carts', json_encode($carts), 2880);
+        $cookie = cookie('carts', json_encode($carts), 2880);
         //KITA JUGA MENAMBAHKAN FLASH MESSAGE UNTUK NOTIFIKASI PRODUK DIMASUKKAN KE KERANJANG
         return redirect()->back()->with(['success' => 'Produk Ditambahkan ke Keranjang'])->cookie($cookie);
     }
@@ -198,7 +198,7 @@ class CartController extends Controller
             DB::commit();
 
             $carts = [];
-            $cookie = cookie('dw-carts', json_encode($carts), 2880);
+            $cookie = cookie('carts', json_encode($carts), 2880);
             //KEMUDIAN HAPUS DATA COOKIE AFILIASI
             Cookie::queue(Cookie::forget('dw-afiliasi'));
 

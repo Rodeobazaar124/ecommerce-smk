@@ -97,9 +97,8 @@
                             <div class="col-md-12 form-group p_star">
                                 <label for="">Kurir</label>
                                 <input type="hidden" name="weight" id="weight" value="{{ $weight }}">
-                                <select class="form-control" name="courier" id="courier" required>
-                                    <option value="">Pilih Kurir</option>
-                                </select>
+                                <input class="form-control" name="courier" id="courier" required>
+                                </input>
                                 <p class="text-danger">{{ $errors->first('courier') }}</p>
                             </div>
                             <!-- ADAPUN DATA KOTA DAN KECAMATAN AKAN DI RENDER SETELAH PROVINSI DIPILIH -->
