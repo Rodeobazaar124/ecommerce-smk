@@ -76,7 +76,7 @@
                             <div class="f_p_item">
                                 <div class="f_p_img">
                                     <!-- KEMUDIAN TAMPILKAN IMAGENYA DARI FOLDER /PUBLIC/STORAGE/PRODUCTS -->
-                                    <img class="img-fluid" src="{{ asset('storage/products/' . $row->image) }}"
+                                    <img class="img-fluid" src="{{ Storage::url($row->image) }}"
                                         alt="{{ $row->name }}">
                                     <div class="p_icon">
                                         <a href="{{ url('/product/' . $row->slug) }}">

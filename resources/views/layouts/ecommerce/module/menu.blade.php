@@ -10,11 +10,11 @@
             aria-expanded="false">Shop</a>
         <ul class="dropdown-menu">
             <li class="nav-item">
-                <a class="nav-link" href="category.html">Shop Category</a>
+                <a class="nav-link" href="{{ route('category.index') }}">Shop Category</a>
             </li>
         </ul>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="contact.html">Contact</a>
+        <a class="nav-link" href="#">Contact</a>
     </li>
 </ul>

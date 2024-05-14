@@ -17,7 +17,9 @@ class DatabaseSeeder extends Seeder
             ProvinceTableSeeder::class,
             CityTableSeeder::class,
             DistrictTableSeeder::class,
-            UsersTableSeeder::class
+            UsersTableSeeder::class,
+            CategorySeeder::class,
+            ProductSeeder::class
         ]);
     }
 }

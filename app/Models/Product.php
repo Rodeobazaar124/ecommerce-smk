@@ -16,10 +16,7 @@ class Product extends Model
     {
         $this->attributes['slug'] = Str::slug($value);
     }
-    /*Ini Adalah Accessor,
-    Jadi Kita Membuat Kolom Baru Bernama Status_Label Kolom Tersebut Dihasilkan Oleh Accessor,
-    Meskipun Field Tersebut Tidak Ada Ditable Products
-    Akan Tetapi Akan Disertakan Pada Hasil Query*/
+
     public function getStatusLabelAttribute()
     {
         //Adapun Valuenya Akan Mencetak Html Berdasarkan Value Dari Field Status

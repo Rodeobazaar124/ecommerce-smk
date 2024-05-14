@@ -36,7 +36,9 @@
                         @else
                             <li><a href="{{ route('customer.login') }}">Login</a></li>
                         @endif
-                        <li><a href="#">My Account</a></li>
+                        @auth
+                        <li><a href="{{ route('customer.dashboard') }}">My Account</a></li>
+                        @endauth
                         <li><a href="contact.html">Contact Us</a></li>
                     </ul>
                 </div>
@@ -47,7 +49,7 @@
                 <div class="container-fluid">
                     <!-- Brand and toggle get grouped for better mobile display -->
                     <a class="navbar-brand logo_h" href="{{ url('/') }}">
-                        <img src="https://daengweb.id/front/dw-theme/images/logo-head.png" alt="">
+                        <img src="https://daengweb.id/front/theme/images/logo-head.png" alt="">
                     </a>
                     <button class="navbar-toggler" type="button" data-toggle="collapse"
                         data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
@@ -85,7 +87,7 @@
                                     </li>
                                     <hr>
                                     <li class="nav-item">
-                                        <a href="#" class="icons">
+                                        <a href="{{route('front.cart')}}" class="icons">
                                             <i class="lnr lnr lnr-cart"></i>
                                         </a>
                                     </li>

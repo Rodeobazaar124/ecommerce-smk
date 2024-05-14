@@ -97,8 +97,9 @@
                             <div class="col-md-12 form-group p_star">
                                 <label for="">Kurir</label>
                                 <input type="hidden" name="weight" id="weight" value="{{ $weight }}">
-                                <input class="form-control" name="courier" id="courier" required>
-                                </input>
+                                <select class="form-control" name="courier" id="courier" required>
+                                    <option value="Silahkan pilih kurir"></option>
+                                </select>
                                 <p class="text-danger">{{ $errors->first('courier') }}</p>
                             </div>
                             <!-- ADAPUN DATA KOTA DAN KECAMATAN AKAN DI RENDER SETELAH PROVINSI DIPILIH -->
@@ -169,7 +170,8 @@
                     //UNTUK MENAMPILKAN DATA KABUPATEN / KOTA
                     $('#city_id').append('<option value="">Pilih Kabupaten/Kota</option>')
                     $.each(html.data, function(key, item) {
-                        $('#city_id').append('<option value="' + item.id + '">' + item
+                        $('#city_id').append('<option value="' + item.id + '">' + item.type+ " "+
+                            item
                             .name + '</option>');
                     })
                 },

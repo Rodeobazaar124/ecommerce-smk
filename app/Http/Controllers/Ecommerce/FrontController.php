@@ -16,7 +16,7 @@ class FrontController extends Controller
     {
         $code = $user . '-' . $product; //KITA MERGE USERID DAN PRODUCTID
         $product = Product::find($product); //FIND PRODUCT BERDASARKAN PRODUCTID
-        $cookie = cookie('dw-afiliasi', json_encode($code), 2880); //BUAT COOKIE DENGAN NAMA DW-AFILIASI DAN VALUENYA ADALAH CODE YANG SUDAH DI-MERGE
+        $cookie = cookie('afiliasi', json_encode($code), 2880); //BUAT COOKIE DENGAN NAMA AFILIASI DAN VALUENYA ADALAH CODE YANG SUDAH DI-MERGE
         //KEMUDIAN REDIRECT KE HALAMAN SHOW PRODUCT DAN MENGIRIMKAN COOKIE KE BROWSER
         return redirect(route('front.show_product', $product->slug))->cookie($cookie);
     }

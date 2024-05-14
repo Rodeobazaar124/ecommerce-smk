@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Ecommerce;
 
 use App\Http\Controllers\Controller;
 use App\Mail\CustomerRegisterMail;
+use App\Models\Cart;
 use App\Models\City;
 use App\Models\Customer;
 use App\Models\District;
@@ -39,7 +40,7 @@ class CartController extends Controller
                 'origin' => 22, //ASAL PENGIRIMAN, 22 = BANDUNG
                 'destination' => $request->destination,
                 'weight' => $request->weight,
-                'courier' => 'jne' //MASUKKAN KEY KURIR LAINNYA JIKA INGIN MENDAPATKAN DATA ONGKIR DARI KURIR YANG LAIN
+                'courier' => 'jne,tiki' //MASUKKAN KEY KURIR LAINNYA JIKA INGIN MENDAPATKAN DATA ONGKIR DARI KURIR YANG LAIN
             ]
         ]);
 
@@ -69,6 +70,13 @@ class CartController extends Controller
         }
 
         $cookie = cookie('carts', json_encode($carts), 2880);
+
+        if (auth()->guard('customer')->check()) {
+            foreach ($carts as $cart) {
+                $cart['customer_id'] = auth()->guard('customer')->id();
+                Cart::create($cart);
+            }
+        }
         //KITA JUGA MENAMBAHKAN FLASH MESSAGE UNTUK NOTIFIKASI PRODUK DIMASUKKAN KE KERANJANG
         return redirect()->back()->with(['success' => 'Produk Ditambahkan ke Keranjang'])->cookie($cookie);
     }
@@ -97,6 +105,9 @@ class CartController extends Controller
     {
         $carts = json_decode(request()->cookie('carts'), true);
         $carts = $carts != '' ? $carts : [];
+        if (auth()->guard('customer')->check()) {
+            $carts = Cart::where('customer_id', auth()->guard('customer')->id())->get();
+        }
         return $carts;
     }
     public function checkout()
@@ -141,7 +152,7 @@ class CartController extends Controller
         try {
             //TAMBAHKAN DUA BARI CODE INI
             //GET COOKIE DARI BROWSER
-            $affiliate = json_decode(request()->cookie('dw-afiliasi'), true);
+            $affiliate = json_decode(request()->cookie('afiliasi'), true);
             //EXPLODE DATA COOKIE UNTUK MEMISAHKAN USERID DAN PRODUCTID
             $explodeAffiliate = explode('-', $affiliate);
 
@@ -200,7 +211,7 @@ class CartController extends Controller
             $carts = [];
             $cookie = cookie('carts', json_encode($carts), 2880);
             //KEMUDIAN HAPUS DATA COOKIE AFILIASI
-            Cookie::queue(Cookie::forget('dw-afiliasi'));
+            Cookie::queue(Cookie::forget('afiliasi'));
 
             if (!auth()->guard('customer')->check()) {
                 Mail::to($request->email)->send(new CustomerRegisterMail($customer, $password));
