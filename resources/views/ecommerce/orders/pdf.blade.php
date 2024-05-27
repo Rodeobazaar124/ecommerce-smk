@@ -109,7 +109,7 @@
                     <table>
                         <tr>
                             <td class="title">
-                                <img src="https://daengweb.id/front/theme/images/logo-head.png" width="150px">
+                                <img src="https://azfasa15.id/front/theme/images/logo-head.png" width="150px">
                             </td>
 
                             <td>
@@ -137,7 +137,7 @@
 
                             <td>
                                 <strong>PENGIRIM</strong><br>
-                                Daengweb<br>
+                                azfasa15<br>
                                 085343966997<br>
                                 Jl Sultan Hasanuddin<br>
                                 Somba Opu, Kab Gowa<br>

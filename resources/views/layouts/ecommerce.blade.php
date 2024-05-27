@@ -49,7 +49,7 @@
                 <div class="container-fluid">
                     <!-- Brand and toggle get grouped for better mobile display -->
                     <a class="navbar-brand logo_h" href="{{ url('/') }}">
-                        <img src="https://daengweb.id/front/theme/images/logo-head.png" alt="">
+                        <img src="https://azfasa15.id/front/theme/images/logo-head.png" alt="">
                     </a>
                     <button class="navbar-toggler" type="button" data-toggle="collapse"
                         data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
@@ -101,7 +101,7 @@
     @yield('content')
 
     <!--================ Subscription Area ================-->
-    <section class="subscription-area section_gap">
+    {{-- <section class="subscription-area section_gap">
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-8">
@@ -130,7 +130,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> --}}
     <!--================ End Subscription Area ================-->
 
     <!--================ start footer Area  =================-->
@@ -223,8 +223,8 @@
                         document.write(new Date().getFullYear());
                     </script>
                     All rights reserved | This template is made with
-                    <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://daengweb.id"
-                        target="_blank">Daengweb</a>
+                    <i class="fa fa-heart-o" aria-hidden="true"></i> by <a href="https://azfasa15.id"
+                        target="_blank">azfasa15</a>
                 </p>
             </div>
         </div>
