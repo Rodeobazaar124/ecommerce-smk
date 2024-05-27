@@ -5,13 +5,15 @@ export default defineConfig({
     plugins: [
         laravel({
             input: [
-                'resources/sass/app.scss',
+                'resources/css/app.css',
                 'resources/js/app.js',
             ],
             refresh: true,
+
         }),
     ],
-    server: {
-        host: "10.111.4.3"
-    }
+server:{
+host: '192.168.220.215',
+// host: '10.111.4.35',
+}
 });
