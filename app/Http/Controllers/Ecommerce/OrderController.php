@@ -19,8 +19,10 @@ class OrderController extends Controller
     {
         $orders = Order::withCount(['return'])->where('customer_id', auth()->guard('customer')->user()->id)
             ->orderBy('created_at', 'DESC')->paginate(10);
+
         return view('ecommerce.orders.index', compact('orders'));
     }
+
     public function view($invoice)
     {
         $order = Order::with(['district.city.province', 'details', 'details.product', 'payment'])
@@ -29,19 +31,23 @@ class OrderController extends Controller
         if (Gate::forUser(auth()->guard('customer')->user())->allows('order-view', $order)) {
             return view('ecommerce.orders.view', compact('order'));
         }
+
         return redirect(route('customer.orders'))->with(['error' => 'Anda Tidak Diizinkan Untuk Mengakses Order Orang Lain']);
     }
+
     public function pdf($invoice)
     {
         $order = Order::with(['district.city.province', 'details', 'details.product', 'payment'])
             ->where('invoice', $invoice)->first();
-        if (!Gate::forUser(auth()->guard('customer')->user())->allows('order-view', $order)) {
+        if (! Gate::forUser(auth()->guard('customer')->user())->allows('order-view', $order)) {
             return redirect(route('customer.view_order', $order->invoice));
         }
 
         $pdf = Pdf::loadView('ecommerce.orders.pdf', compact('order'));
+
         return $pdf->stream();
     }
+
     public function acceptOrder(Request $request)
     {
         //CARI DATA ORDER BERDASARKAN ID
@@ -53,6 +59,7 @@ class OrderController extends Controller
 
         //UBAH STATUSNYA MENJADI 4
         $order->update(['status' => 4]);
+
         //REDIRECT KEMBALI DENGAN MENAMPILKAN ALERT SUCCESS
         return redirect()->back()->with(['success' => 'Pesanan Dikonfirmasi']);
     }
@@ -61,23 +68,27 @@ class OrderController extends Controller
     {
         //LOAD DATA BERDASARKAN INVOICE
         $order = Order::where('invoice', $invoice)->first();
+
         //LOAD VIEW RETURN.BLADE.PHP DAN PASSING DATA ORDER
         return view('ecommerce.orders.return', compact('order'));
     }
+
     public function processReturn(Request $request, $id)
     {
         $this->validate($request, [
             'reason' => 'required|string',
             'refund_transfer' => 'required|string',
-            'photo' => 'required|image|mimes:jpg,png,jpeg'
+            'photo' => 'required|image|mimes:jpg,png,jpeg',
         ]);
 
         $return = OrderReturn::where('order_id', $id)->first();
-        if ($return) return redirect()->back()->with(['error' => 'Permintaan Refund Dalam Proses']);
+        if ($return) {
+            return redirect()->back()->with(['error' => 'Permintaan Refund Dalam Proses']);
+        }
 
         if ($request->hasFile('photo')) {
             $file = $request->file('photo');
-            $filename = time() . Str::random(5) . '.' . $file->getClientOriginalExtension();
+            $filename = time().Str::random(5).'.'.$file->getClientOriginalExtension();
             $file->storeAs('public/return', $filename);
 
             OrderReturn::create([
@@ -85,27 +96,29 @@ class OrderController extends Controller
                 'photo' => $filename,
                 'reason' => $request->reason,
                 'refund_transfer' => $request->refund_transfer,
-                'status' => 0
+                'status' => 0,
             ]);
 
             //CODE BARU HANYA PADA BAGIAN INI SAJA
             $order = Order::find($id); //AMBIL DATA ORDER BERDASARKAN ID
             //KIRIM PESAN MELALUI BOT
-            $this->sendMessage('#' . $order->invoice, $request->reason);
+            $this->sendMessage('#'.$order->invoice, $request->reason);
             //CODE BARU HANYA PADA BAGIAN INI SAJA
 
             return redirect()->back()->with(['success' => 'Permintaan Refund Dikirim']);
         }
     }
+
     private function getTelegram($url, $params)
     {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url . $params);
+        curl_setopt($ch, CURLOPT_URL, $url.$params);
 
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_TIMEOUT, 3);
         $content = curl_exec($ch);
         curl_close($ch);
+
         return json_decode($content, true);
     }
 
@@ -113,7 +126,7 @@ class OrderController extends Controller
     {
         $key = env('TELEGRAM_KEY'); //AMBIL TOKEN DARI ENV
         //KEMUDIAN KIRIM REQUEST KE TELEGRAM UNTUK MENGAMBIL DATA USER YANG ME-LISTEN BOT KITA
-        $chat = $this->getTelegram('https://api.telegram.org/' . $key . '/getUpdates', '');
+        $chat = $this->getTelegram('https://api.telegram.org/'.$key.'/getUpdates', '');
         //JIKA ADA
         if ($chat['ok']) {
             //SAYA BERASUMSI PESAN INI HANYA DIKIRIM KE ADMIN, MAKA KITA TIDAK PERLU MELOOPING HASIL DARI GET DATA USER
@@ -121,16 +134,18 @@ class OrderController extends Controller
             //UNTUK MENDAPATKAN CHAT_ID
             $chat_id = $chat['result'][0]['message']['chat']['id'];
             //TEKS YANG DIINGINKAN
-            $text = 'Hai DaengWeb, OrderID ' . $order_id . ' Melakukan Permintaan Refund Dengan Alasan "' . $reason . '", Segera Dicek Ya!';
+            $text = 'Hai DaengWeb, OrderID '.$order_id.' Melakukan Permintaan Refund Dengan Alasan "'.$reason.'", Segera Dicek Ya!';
 
             //DAN KIRIM REQUEST KE TELEGRAM UNTUK MENGIRIMKAN PESAN
-            return $this->getTelegram('https://api.telegram.org/' . $key . '/sendMessage', '?chat_id=' . $chat_id . '&text=' . $text);
+            return $this->getTelegram('https://api.telegram.org/'.$key.'/sendMessage', '?chat_id='.$chat_id.'&text='.$text);
         }
     }
+
     public function paymentForm()
     {
         return view('ecommerce.payment');
     }
+
     public function storePayment(Request $request)
     {
         $this->validate($request, [
@@ -139,19 +154,20 @@ class OrderController extends Controller
             'transfer_to' => 'required|string',
             'transfer_date' => 'required',
             'amount' => 'required|integer',
-            'proof' => 'required|image|mimes:jpg,png,jpeg,webp,svg,gif,'
+            'proof' => 'required|image|mimes:jpg,png,jpeg,webp,svg,gif,',
         ]);
 
         DB::beginTransaction();
         try {
             $order = Order::where('invoice', $request->invoice)->first();
-            if ($order->subtotal != $request->amount) return redirect()->back()->with(['error' => 'Error, Pembayaran Harus Sama Dengan Tagihan']);
+            if ($order->subtotal != $request->amount) {
+                return redirect()->back()->with(['error' => 'Error, Pembayaran Harus Sama Dengan Tagihan']);
+            }
 
             if ($order->status == 0 && $request->hasFile('proof')) {
                 $file = $request->file('proof');
-                $filename = time() . '.' . $file->getClientOriginalExtension();
+                $filename = time().'.'.$file->getClientOriginalExtension();
                 $file->storeAs('public/payment', $filename);
-
 
                 Payment::create([
                     'order_id' => $order->id,
@@ -160,15 +176,18 @@ class OrderController extends Controller
                     'transfer_date' => Carbon::parse($request->transfer_date)->format('Y-m-d'),
                     'amount' => $request->amount,
                     'proof' => $filename,
-                    'status' => false
+                    'status' => false,
                 ]);
                 $order->update(['status' => 1]);
                 DB::commit();
+
                 return redirect()->back()->with(['success' => 'Pesanan Dikonfirmasi']);
             }
+
             return redirect()->back()->with(['error' => 'Error, Upload Bukti Transfer']);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             DB::rollback();
+
             return redirect()->back()->with(['error' => $e->getMessage()]);
         }
     }

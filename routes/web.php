@@ -23,12 +23,12 @@ Route::post('/cart/update', [CartController::class, 'updateCart'])->name('front.
 Route::get('/checkout', [CartController::class, 'checkout'])->name('front.checkout');
 Route::post('/checkout', [CartController::class, 'processCheckout'])->name('front.store_checkout');
 Route::get('/checkout/{invoice}', [CartController::class, 'checkoutFinish'])->name('front.finish_checkout');
-Route::group(['prefix' => 'member', 'namespace' => 'Ecommerce'], function() {
+Route::group(['prefix' => 'member', 'namespace' => 'Ecommerce'], function () {
     Route::get('login', [LoginController::class, 'loginForm'])->name('customer.login');
     Route::post('login', [LoginController::class, 'login'])->name('customer.post_login');
     Route::get('verify/{token}', [FrontController::class, 'verifyCustomerRegistration'])->name('customer.verify');
 
-    Route::group(['middleware' => 'customer'], function() {
+    Route::group(['middleware' => 'customer'], function () {
         Route::get('dashboard', [LoginController::class, 'dashboard'])->name('customer.dashboard');
         Route::get('logout', [LoginController::class, 'logout'])->name('customer.logout');
         Route::get('orders', [OrderController::class, 'index'])->name('customer.orders');
@@ -44,8 +44,6 @@ Route::group(['prefix' => 'member', 'namespace' => 'Ecommerce'], function() {
         Route::get('/afiliasi', [FrontController::class, 'listCommission'])->name('customer.affiliate');
     });
 });
-
-
 
 Auth::routes();
 Route::group(['prefix' => 'administrator', 'middleware' => 'auth'], function () {

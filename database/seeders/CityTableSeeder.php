@@ -4,9 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\City;
 use GuzzleHttp\Client;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class CityTableSeeder extends Seeder
 {
@@ -18,7 +16,7 @@ class CityTableSeeder extends Seeder
         $client = new Client();
         $response = $client->request('GET', 'https://api.rajaongkir.com/starter/city', [
             'headers' => [
-                'key' => config('app.rajaongkir_api_key')
+                'key' => config('app.rajaongkir_api_key'),
             ],
 
         ]);
@@ -32,7 +30,7 @@ class CityTableSeeder extends Seeder
                 'province_id' => $result['province_id'],
                 'type' => $result['type'],
                 'name' => $result['city_name'],
-                'postal_code' => $result['postal_code']
+                'postal_code' => $result['postal_code'],
             ]);
         }
     }

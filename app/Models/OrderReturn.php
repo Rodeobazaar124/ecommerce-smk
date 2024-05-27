@@ -2,12 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class OrderReturn extends Model
 {
     protected $guarded = [];
+
     protected $appends = ['status_label'];
 
     public function getStatusLabelAttribute()
@@ -17,6 +17,7 @@ class OrderReturn extends Model
         } elseif ($this->status == 2) {
             return '<span class="badge badge-danger">Ditolak</span>';
         }
+
         return '<span class="badge badge-success">Selesai</span>';
     }
 }

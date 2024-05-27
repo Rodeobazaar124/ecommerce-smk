@@ -75,16 +75,12 @@
                                     </li>
                                     <hr>
                                     <li class="nav-item">
-                                        <a href="#" class="icons">
+                                        <a href="{{route('customer.dashboard')}}" class="icons">
                                             <i class="fa fa-user" aria-hidden="true"></i>
                                         </a>
                                     </li>
                                     <hr>
-                                    <li class="nav-item">
-                                        <a href="#" class="icons">
-                                            <i class="fa fa-heart-o" aria-hidden="true"></i>
-                                        </a>
-                                    </li>
+
                                     <hr>
                                     <li class="nav-item">
                                         <a href="{{route('front.cart')}}" class="icons">

@@ -16,9 +16,10 @@ class MarketplaceJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-
     protected $username;
+
     protected $take;
+
     public function __construct($username, $take)
     {
         $this->username = $username;
@@ -37,23 +38,22 @@ class MarketplaceJob implements ShouldQueue
 
         $response = $client->request('POST', $url, [
             'headers' => [
-                'Authorization' => 'MASUKKAN API KEY ANDA DISINI'
+                'Authorization' => 'MASUKKAN API KEY ANDA DISINI',
             ],
 
             'form_params' => [
                 'username' => $this->username,
-                'take' => $this->take
-            ]
+                'take' => $this->take,
+            ],
         ]);
 
         $body = json_decode($response->getBody(), true);
 
         foreach ($body['data']['results'] as $row) {
 
-            $filename = Str::slug($row['title']) . '-' . time() . '.png';
+            $filename = Str::slug($row['title']).'-'.time().'.png';
 
-            file_put_contents(storage_path('app/public/products/' . $filename), file_get_contents($row['images'][0]));
-
+            file_put_contents(storage_path('app/public/products/'.$filename), file_get_contents($row['images'][0]));
 
             $category = Category::first();
 
@@ -61,11 +61,9 @@ class MarketplaceJob implements ShouldQueue
 
                 $category = Category::firstOrCreate([
                     'name' => $row['categories'][0],
-                    'slug' => Str::slug($row['categories'][0])
+                    'slug' => Str::slug($row['categories'][0]),
                 ]);
             }
-
-
 
             Product::firstOrCreate(
                 [
@@ -78,15 +76,12 @@ class MarketplaceJob implements ShouldQueue
                     'image' => $filename,
                     'price' => $row['price'],
                     'weight' => 600,
-                    'status' => 1
+                    'status' => 1,
                 ]
             );
         }
 
-
-
         if (count($body['data']['results']) > 0) {
-
 
             MarketplaceJob::dispatch($this->username, $this->take + 10)->delay(now()->addMinutes(5));
         }

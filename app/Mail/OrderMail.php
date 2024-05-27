@@ -4,7 +4,6 @@ namespace App\Mail;
 
 use App\Models\Order;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -13,7 +12,9 @@ use Illuminate\Queue\SerializesModels;
 class OrderMail extends Mailable
 {
     use Queueable, SerializesModels;
+
     protected $order;
+
     /**
      * Create a new message instance.
      */
@@ -21,6 +22,7 @@ class OrderMail extends Mailable
     {
         $this->order = $order;
     }
+
     /**
      * Get the message envelope.
      */
@@ -39,7 +41,7 @@ class OrderMail extends Mailable
         return new Content(
             view: 'emails.order',
             with: [
-                'order' => $this->order
+                'order' => $this->order,
             ]
         );
     }

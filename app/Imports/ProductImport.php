@@ -4,13 +4,13 @@ namespace App\Imports;
 
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\Importable;
-use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
+use Maatwebsite\Excel\Concerns\WithStartRow;
 
-class ProductImport implements WithStartRow, WithChunkReading
+class ProductImport implements WithChunkReading, WithStartRow
 {
     /**
-     * @param Collection $collection
+     * @param  Collection  $collection
      */
     use Importable;
 

@@ -10,7 +10,9 @@ use Illuminate\Support\Str;
 class Category extends Model
 {
     use HasFactory;
+
     protected $fillable = ['name', 'parent_id', 'slug'];
+
     public function setSlugAttribute($value)
     {
         $this->attributes['slug'] = Str::slug($value);
@@ -20,10 +22,12 @@ class Category extends Model
     {
         return ucfirst($value);
     }
+
     public function parent()
     {
         return $this->belongsTo(Category::class);
     }
+
     public function child()
     {
         return $this->hasMany(Category::class, 'parent_id');
@@ -33,10 +37,9 @@ class Category extends Model
     {
         return $query->whereNull('parent_id');
     }
+
     /**
      * Get all of the product for the Category
-     *
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
     public function product(): HasMany
     {

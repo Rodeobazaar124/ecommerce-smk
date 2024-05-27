@@ -4,9 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Province;
 use GuzzleHttp\Client;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
 
 class ProvinceTableSeeder extends Seeder
 {
@@ -18,7 +16,7 @@ class ProvinceTableSeeder extends Seeder
         $client = new Client();
         $response = $client->request('GET', 'https://api.rajaongkir.com/starter/province', [
             'headers' => [
-                'key' => config('app.rajaongkir_api_key')
+                'key' => config('app.rajaongkir_api_key'),
             ],
 
         ]);

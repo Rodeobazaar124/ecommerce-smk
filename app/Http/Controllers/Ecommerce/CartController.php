@@ -15,9 +15,9 @@ use App\Models\Province;
 use GuzzleHttp\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class CartController extends Controller
 {
@@ -25,81 +25,87 @@ class CartController extends Controller
     {
         $this->validate($request, [
             'destination' => 'required',
-            'weight' => 'required|integer'
+            'weight' => 'required|integer',
         ]);
 
         $url = 'https://api.rajaongkir.com/starter/cost';
         $client = new Client();
         $response = $client->request('POST', $url, [
             'headers' => [
-                'key' => config('app.rajaongkir_api_key')
+                'key' => config('app.rajaongkir_api_key'),
             ],
             'form_params' => [
                 'origin' => 22,
                 'destination' => $request->destination,
                 'weight' => $request->weight,
-                'courier' => 'jne'
-            ]
+                'courier' => 'jne',
+            ],
         ]);
         $body = json_decode($response->getBody(), true);
+
         return $body;
     }
+
     public function addToCart(Request $request)
-{
-    $this->validate($request, [
-        'product_id' => 'required|exists:products,id',
-        'qty' => 'required|integer'
-    ]);
+    {
+        $this->validate($request, [
+            'product_id' => 'required|exists:products,id',
+            'qty' => 'required|integer',
+        ]);
 
-    // Check if the user is authenticated and is a customer
-    if (auth()->guard('customer')->check()) {
-        $user = auth()->guard('customer')->user();
+        // Check if the user is authenticated and is a customer
+        if (auth()->guard('customer')->check()) {
+            $user = auth()->guard('customer')->user();
 
-        // Fetch the product
-        $product = Product::findOrFail($request->product_id);
+            // Fetch the product
+            $product = Product::findOrFail($request->product_id);
 
-        // Save or update the cart model
-        $cart = Cart::updateOrCreate(
-            ['customer_id' => $user->id, 'product_id' => $request->product_id],
-            [
+            // Save or update the cart model
+            $cart = Cart::updateOrCreate(
+                ['customer_id' => $user->id, 'product_id' => $request->product_id],
+                [
+                    'product_name' => $product->name,
+                    'product_price' => $product->price,
+                    'product_image' => $product->image,
+                    'weight' => $product->weight,
+                    'qty' => DB::raw("qty + {$request->qty}"), // Incrementing qty by the specified value
+                ]
+            );
+
+            // Redirect with success message
+            return redirect()->back()->with(['success' => 'Produk Ditambahkan ke Keranjang']);
+        }
+
+        // If the user is not authenticated as a customer, proceed with cookie-based cart
+        $carts = $this->getCarts();
+        if ($carts && array_key_exists($request->product_id, $carts)) {
+            $carts[$request->product_id]['qty'] += $request->qty;
+        } else {
+            $product = Product::find($request->product_id);
+            $carts[$request->product_id] = [
+                'qty' => $request->qty,
+                'product_id' => $product->id,
                 'product_name' => $product->name,
                 'product_price' => $product->price,
                 'product_image' => $product->image,
                 'weight' => $product->weight,
-                'qty' => DB::raw("qty + {$request->qty}") // Incrementing qty by the specified value
-            ]
-        );
+            ];
+        }
+        $cookie = cookie('carts', json_encode($carts), 2880);
 
-        // Redirect with success message
-        return redirect()->back()->with(['success' => 'Produk Ditambahkan ke Keranjang']);
+        return redirect()->back()->with(['success' => 'Produk Ditambahkan ke Keranjang'])->cookie($cookie);
     }
 
-    // If the user is not authenticated as a customer, proceed with cookie-based cart
-    $carts = $this->getCarts();
-    if ($carts && array_key_exists($request->product_id, $carts)) {
-        $carts[$request->product_id]['qty'] += $request->qty;
-    } else {
-        $product = Product::find($request->product_id);
-        $carts[$request->product_id] = [
-            'qty' => $request->qty,
-            'product_id' => $product->id,
-            'product_name' => $product->name,
-            'product_price' => $product->price,
-            'product_image' => $product->image,
-            'weight' => $product->weight
-        ];
-    }
-    $cookie = cookie('carts', json_encode($carts), 2880);
-    return redirect()->back()->with(['success' => 'Produk Ditambahkan ke Keranjang'])->cookie($cookie);
-}
     public function listCart()
     {
         $carts = $this->getCarts();
         $subtotal = collect($carts)->sum(function ($q) {
             return $q['qty'] * $q['product_price'];
         });
+
         return view('ecommerce.cart', compact('carts', 'subtotal'));
     }
+
     public function updateCart(Request $request)
     {
         $carts = $this->getCarts();
@@ -111,8 +117,10 @@ class CartController extends Controller
             }
         }
         $cookie = cookie('carts', json_encode($carts), 2880);
+
         return redirect()->back()->cookie($cookie);
     }
+
     private function getCarts()
     {
         $carts = json_decode(request()->cookie('carts'), true);
@@ -121,8 +129,10 @@ class CartController extends Controller
             $carts = $carts->toArray();
         }
         $carts = $carts != '' ? $carts : [];
+
         return $carts;
     }
+
     public function checkout()
     {
         $provinces = Province::orderBy('created_at', 'DESC')->get();
@@ -133,19 +143,24 @@ class CartController extends Controller
         $weight = collect($carts)->sum(function ($q) {
             return $q['qty'] * $q['weight'];
         });
+
         return view('ecommerce.checkout', compact('provinces', 'carts', 'subtotal', 'weight'));
     }
+
     public function getCity()
     {
         $cities = City::where('province_id', request()->province_id)->get();
+
         return response()->json(['status' => 'success', 'data' => $cities]);
     }
 
     public function getDistrict()
     {
         $districts = District::where('city_id', request()->city_id)->get();
+
         return response()->json(['status' => 'success', 'data' => $districts]);
     }
+
     public function processCheckout(Request $request)
     {
         $this->validate($request, [
@@ -165,7 +180,7 @@ class CartController extends Controller
             $explodeAffiliate = explode('-', $affiliate);
 
             $customer = Customer::where('email', $request->email)->first();
-            if (!auth()->guard('customer')->check() && $customer) {
+            if (! auth()->guard('customer')->check() && $customer) {
                 return redirect()->back()->with(['error' => 'Silahkan Login Terlebih Dahulu']);
             }
 
@@ -174,7 +189,7 @@ class CartController extends Controller
                 return $q['qty'] * $q['product_price'];
             });
 
-            if (!auth()->guard('customer')->check()) {
+            if (! auth()->guard('customer')->check()) {
                 $password = Str::random(8);
                 $customer = Customer::create([
                     'name' => $request->customer_name,
@@ -184,13 +199,13 @@ class CartController extends Controller
                     'address' => $request->customer_address,
                     'district_id' => $request->district_id,
                     'activate_token' => Str::random(30),
-                    'status' => false
+                    'status' => false,
                 ]);
             }
 
             // $shipping = explode('-', $request->courier);
             $order = Order::create([
-                'invoice' => Str::random(4) . '-' . time(),
+                'invoice' => Str::random(4).'-'.time(),
                 'customer_id' => $customer->id,
                 'customer_name' => $customer->name,
                 'customer_phone' => $request->customer_phone,
@@ -199,7 +214,7 @@ class CartController extends Controller
                 'subtotal' => $subtotal,
                 // 'cost' => $shipping[2],
                 // 'shipping' => $shipping[0] . '-' . $shipping[1],
-                'ref' => $affiliate != '' && $explodeAffiliate[0] != auth()->guard('customer')->user()->id ? $affiliate : NULL
+                'ref' => $affiliate != '' && $explodeAffiliate[0] != auth()->guard('customer')->user()->id ? $affiliate : null,
             ]);
 
             foreach ($carts as $row) {
@@ -209,7 +224,7 @@ class CartController extends Controller
                     'product_id' => $row['product_id'],
                     'price' => $row['product_price'],
                     'qty' => $row['qty'],
-                    'weight' => $product->weight
+                    'weight' => $product->weight,
                 ]);
             }
 
@@ -219,12 +234,14 @@ class CartController extends Controller
             $cookie = cookie('carts', json_encode($carts), 2880);
             Cookie::queue(Cookie::forget('afiliasi'));
 
-            if (!auth()->guard('customer')->check()) {
+            if (! auth()->guard('customer')->check()) {
                 Mail::to($request->email)->send(new CustomerRegisterMail($customer, $password));
             }
+
             return redirect(route('front.finish_checkout', $order->invoice))->cookie($cookie);
         } catch (\Exception $e) {
             DB::rollback();
+
             return redirect()->back()->with(['error' => $e->getMessage()]);
         }
     }
@@ -232,6 +249,7 @@ class CartController extends Controller
     public function checkoutFinish($invoice)
     {
         $order = Order::with(['district.city'])->where('invoice', $invoice)->first();
+
         return view('ecommerce.checkout_finish', compact('order'));
     }
 }

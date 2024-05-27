@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
 
 class RedirectIfAuthenticated
 {
@@ -19,6 +18,7 @@ class RedirectIfAuthenticated
         if (Auth::guard($guard)->check()) {
             return redirect('/administrator/home'); // Ubah Bagian Ini
         }
-     return $next($request);
+
+        return $next($request);
     }
 }

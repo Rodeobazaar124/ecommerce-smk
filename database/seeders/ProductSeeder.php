@@ -3,10 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Product;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\DB;
 
 class ProductSeeder extends Seeder
 {
@@ -37,7 +35,6 @@ class ProductSeeder extends Seeder
             ['products/jahe1.jpg', 'Jahe instan', 'Jahe instan merupakan produk makanan yang berbentuk serbuk, terbuat dari ekstrak jahe yang ditambah gula atau rempah-rempah lain', 45000, 3],
             ['products/opak.jpg', 'Opak oded', 'Kuliner tradisional yang sungguh luar biasa dan patut dicoba. Terbuat dari beras ketan yang direbus, kemudian dibungkus dengan daun pisang dan dipanggang hingga matang, opak memiliki cita rasa yang khas dan tekstur yang begitu memikat.', 25000, 3],
         ];
-
 
         foreach ($dnp_product as $product) {
             Product::insert([

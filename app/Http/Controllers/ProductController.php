@@ -6,9 +6,9 @@ use App\Jobs\MarketplaceJob;
 use App\Jobs\ProductJob;
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProductController extends Controller
 {
@@ -17,29 +17,33 @@ class ProductController extends Controller
         //VALIDASI INPUTAN
         $this->validate($request, [
             'marketplace' => 'required|string',
-            'username' => 'required|string'
+            'username' => 'required|string',
         ]);
 
         MarketplaceJob::dispatch($request->username, 10); //BUAT JOBS QUEUE
+
         //PARAMETER PERTAMA ADALAH USERNAME TOKO PADA MARKETPLACE
         //PARAMETER KEDUA ADALAH JUMLAH PRODUK YANG AKAN AMBIL DALAM SEKALI PROSES
         //SAYA SARANKAN MENGGUNAKAN VALUE 10 UNTUK MEMPERCEPAT PROSES
         return redirect()->back()->with(['success' => 'Produk Dalam Antrian']);
     }
+
     public function index()
     {
         $product = Product::with(['category'])->orderBy('created_at', 'DESC');
 
         if (request()->q != '') {
-            $product = $product->where('name', 'LIKE', '%' . request()->q . '%');
+            $product = $product->where('name', 'LIKE', '%'.request()->q.'%');
         }
         $product = $product->paginate(10);
+
         return view('products.index', compact('product'));
     }
 
     public function create()
     {
         $category = Category::orderBy('name', 'DESC')->get();
+
         return view('products.create', compact('category'));
     }
 
@@ -51,12 +55,12 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|integer',
             'weight' => 'required|integer',
-            'image' => 'required|image|mimes:png,jpeg,jpg'
+            'image' => 'required|image|mimes:png,jpeg,jpg',
         ]);
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $filename = time() . Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
+            $filename = time().Str::slug($request->name).'.'.$file->getClientOriginalExtension();
             $file->storeAs('public/products', $filename);
 
             $product = Product::create([
@@ -67,8 +71,9 @@ class ProductController extends Controller
                 'image' => $filename,
                 'price' => $request->price,
                 'weight' => $request->weight,
-                'status' => $request->status
+                'status' => $request->status,
             ]);
+
             return redirect(route('product.index'))->with(['success' => 'Produk Baru Ditambahkan']);
         }
     }
@@ -81,6 +86,7 @@ class ProductController extends Controller
     {
         $product = Product::find($id);
         $category = Category::orderBy('name', 'DESC')->get();
+
         return view('products.edit', compact('product', 'category'));
     }
 
@@ -93,7 +99,7 @@ class ProductController extends Controller
             'category_id' => 'required|exists:categories,id',
             'price' => 'required|integer',
             'weight' => 'required|integer',
-            'image' => 'nullable|image|mimes:png,jpeg,jpg'
+            'image' => 'nullable|image|mimes:png,jpeg,jpg',
         ]);
 
         $product = Product::find($id);
@@ -101,9 +107,9 @@ class ProductController extends Controller
 
         if ($request->hasFile('image')) {
             $file = $request->file('image');
-            $filename = time() . Str::slug($request->name) . '.' . $file->getClientOriginalExtension();
+            $filename = time().Str::slug($request->name).'.'.$file->getClientOriginalExtension();
             $file->storeAs('public/products', $filename);
-            Storage::delete(Storage::path('app/public/products/' . $product->image));
+            Storage::delete(Storage::path('app/public/products/'.$product->image));
         }
 
         $product->update([
@@ -112,37 +118,42 @@ class ProductController extends Controller
             'category_id' => $request->category_id,
             'price' => $request->price,
             'weight' => $request->weight,
-            'image' => $filename
+            'image' => $filename,
         ]);
+
         return redirect(route('product.index'))->with(['success' => 'Data Produk Diperbaharui']);
     }
 
     public function destroy($id)
     {
         $product = Product::find($id);
-        Storage::delete(Storage::path('app/public/products/' . $product->image));
+        Storage::delete(Storage::path('app/public/products/'.$product->image));
         $product->delete();
+
         return redirect(route('product.index'))->with(['success' => 'Produk Sudah Dihapus']);
     }
 
     public function massUploadForm()
     {
         $category = Category::orderBy('name', 'DESC')->get();
+
         return view('products.bulk-upload-form', compact('category'));
     }
+
     public function massUpload(Request $request)
     {
         $this->validate($request, [
             'category_id' => 'required|exists:categories,id',
-            'file' => 'required|mimes:xlsx,xls'
+            'file' => 'required|mimes:xlsx,xls',
         ]);
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            $filename = time() . '-product.' . $file->getClientOriginalExtension();
+            $filename = time().'-product.'.$file->getClientOriginalExtension();
             $file->storeAs('public/uploads', $filename);
 
             ProductJob::dispatch($request->category_id, $filename);
+
             return redirect()->back()->with(['success' => 'Upload Produk Dijadwalkan']);
         }
     }
