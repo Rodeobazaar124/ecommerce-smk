@@ -53,6 +53,10 @@ class Order extends Model
         }
         return '<span class="badge badge-success">Dicairkan</span>';
     }
+    public function payment()
+    {
+        return $this->hasOne(Payment::class);
+    }
 
     public function getCommissionAttribute()
     {

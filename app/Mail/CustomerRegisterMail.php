@@ -35,7 +35,7 @@ class CustomerRegisterMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email.register',
+            view: 'emails.register',
             with: [
                 'customer' => $this->customer,
                 'password' => $this->randomPassword,

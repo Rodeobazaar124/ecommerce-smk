@@ -11,10 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->integer('cost')->after('subtotal')->default(0);
-            $table->string('shipping')->after('cost')->nullable();
-        });
+        // Schema::table('orders', function (Blueprint $table) {
+        //     $table->integer('cost')->after('subtotal')->default(0);
+        //     $table->string('shipping')->after('cost')->nullable();
+        // });
     }
 
     /**
@@ -22,9 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('orders', function (Blueprint $table) {
-            $table->dropColumn('cost');
-            $table->dropColumn('shipping');
-        });
+        // Schema::table('orders', function (Blueprint $table) {
+        //     $table->dropColumn('cost');
+        //     $table->dropColumn('shipping');
+        // });
     }
 };

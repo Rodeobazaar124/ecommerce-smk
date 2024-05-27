@@ -46,7 +46,6 @@
                                         </div>
                                     </div>
                                 </form>
-
                                 <!-- TABLE UNTUK MENAMPILKAN DATA PRODUK -->
                                 <div class="table-responsive">
                                     <table class="table table-hover table-bordered">
@@ -79,7 +78,7 @@
                                                                 gr</span></label>
                                                     </td>
                                                     <td>Rp {{ number_format($row->price) }}</td>
-                                                    <td>{{ $row->created_at->format('d-m-Y') }}</td>
+                                                    <td>{{ $row->created_at !== null ? $row->created_at->format('d-m-Y') : '-'}}</td>
 
                                                     <!-- KARENA BERISI HTML MAKA KITA GUNAKAN { !! UNTUK MENCETAK DATA -->
                                                     <td>{!! $row->status_label !!}</td>

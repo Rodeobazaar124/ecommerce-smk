@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Ecommerce;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderReturn;
+use App\Models\Payment;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Str;
 
@@ -122,6 +125,51 @@ class OrderController extends Controller
 
             //DAN KIRIM REQUEST KE TELEGRAM UNTUK MENGIRIMKAN PESAN
             return $this->getTelegram('https://api.telegram.org/' . $key . '/sendMessage', '?chat_id=' . $chat_id . '&text=' . $text);
+        }
+    }
+    public function paymentForm()
+    {
+        return view('ecommerce.payment');
+    }
+    public function storePayment(Request $request)
+    {
+        $this->validate($request, [
+            'invoice' => 'required|exists:orders,invoice',
+            'name' => 'required|string',
+            'transfer_to' => 'required|string',
+            'transfer_date' => 'required',
+            'amount' => 'required|integer',
+            'proof' => 'required|image|mimes:jpg,png,jpeg,webp,svg,gif,'
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $order = Order::where('invoice', $request->invoice)->first();
+            if ($order->subtotal != $request->amount) return redirect()->back()->with(['error' => 'Error, Pembayaran Harus Sama Dengan Tagihan']);
+
+            if ($order->status == 0 && $request->hasFile('proof')) {
+                $file = $request->file('proof');
+                $filename = time() . '.' . $file->getClientOriginalExtension();
+                $file->storeAs('public/payment', $filename);
+
+
+                Payment::create([
+                    'order_id' => $order->id,
+                    'name' => $request->name,
+                    'transfer_to' => $request->transfer_to,
+                    'transfer_date' => Carbon::parse($request->transfer_date)->format('Y-m-d'),
+                    'amount' => $request->amount,
+                    'proof' => $filename,
+                    'status' => false
+                ]);
+                $order->update(['status' => 1]);
+                DB::commit();
+                return redirect()->back()->with(['success' => 'Pesanan Dikonfirmasi']);
+            }
+            return redirect()->back()->with(['error' => 'Error, Upload Bukti Transfer']);
+        } catch(\Exception $e) {
+            DB::rollback();
+            return redirect()->back()->with(['error' => $e->getMessage()]);
         }
     }
 }

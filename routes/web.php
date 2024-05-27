@@ -6,6 +6,7 @@ use App\Http\Controllers\Ecommerce\FrontController;
 use App\Http\Controllers\Ecommerce\LoginController;
 use App\Http\Controllers\Ecommerce\OrderController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\OrderController as AdminOrderController;
 use App\Http\Controllers\ProductController;
 use App\Mail\TestMail;
 use Illuminate\Support\Facades\Auth;
@@ -22,24 +23,28 @@ Route::post('/cart/update', [CartController::class, 'updateCart'])->name('front.
 Route::get('/checkout', [CartController::class, 'checkout'])->name('front.checkout');
 Route::post('/checkout', [CartController::class, 'processCheckout'])->name('front.store_checkout');
 Route::get('/checkout/{invoice}', [CartController::class, 'checkoutFinish'])->name('front.finish_checkout');
-Route::group(['prefix' => 'member', 'namespace' => 'Ecommerce'], function () {
+Route::group(['prefix' => 'member', 'namespace' => 'Ecommerce'], function() {
     Route::get('login', [LoginController::class, 'loginForm'])->name('customer.login');
     Route::post('login', [LoginController::class, 'login'])->name('customer.post_login');
     Route::get('verify/{token}', [FrontController::class, 'verifyCustomerRegistration'])->name('customer.verify');
-    Route::get('orders', [OrderController::class, 'index'])->name('customer.orders');
-    Route::get('orders/{invoice}', [OrderController::class, 'view'])->name('customer.view_order');
-    Route::get('orders/pdf/{invoice}', [OrderController::class, 'pdf'])->name('customer.order_pdf');
+
+    Route::group(['middleware' => 'customer'], function() {
+        Route::get('dashboard', [LoginController::class, 'dashboard'])->name('customer.dashboard');
+        Route::get('logout', [LoginController::class, 'logout'])->name('customer.logout');
+        Route::get('orders', [OrderController::class, 'index'])->name('customer.orders');
+        Route::get('orders/{invoice}', [OrderController::class, 'view'])->name('customer.view_order');
+        Route::get('orders/pdf/{invoice}', [OrderController::class, 'pdf'])->name('customer.order_pdf');
+        Route::post('orders/accept', [OrderController::class, 'acceptOrder'])->name('customer.order_accept');
+        Route::get('orders/return/{invoice}', [OrderController::class, 'returnForm'])->name('customer.order_return');
+        Route::put('orders/return/{invoice}', [OrderController::class, 'processReturn'])->name('customer.return');
+        Route::get('payment', [OrderController::class, 'paymentForm'])->name('customer.paymentForm');
+        Route::post('payment', [OrderController::class, 'storePayment'])->name('customer.savePayment');
+        Route::get('setting', [FrontController::class, 'customerSettingForm'])->name('customer.settingForm');
+        Route::post('setting', [FrontController::class, 'customerUpdateProfile'])->name('customer.setting');
+        Route::get('/afiliasi', [FrontController::class, 'listCommission'])->name('customer.affiliate');
+    });
 });
-Route::group(['middleware' => 'customer'], function () {
-    Route::get('setting', [FrontController::class, 'customerSettingForm'])->name('customer.settingForm');
-    Route::get('/afiliasi', [FrontController::class, 'listCommission'])->name('customer.affiliate');
-    Route::post('setting', [FrontController::class, 'customerUpdateProfile'])->name('customer.setting');
-    Route::get('dashboard', [LoginController::class, 'dashboard'])->name('customer.dashboard');
-    Route::get('logout', [LoginController::class, 'logout'])->name('customer.logout');
-    Route::post('orders/accept', [OrderController::class, 'acceptOrder'])->name('customer.order_accept');
-    Route::get('orders/return/{invoice}', [OrderController::class, 'returnForm'])->name('customer.order_return');
-    Route::put('orders/return/{invoice}', [OrderController::class, 'processReturn'])->name('customer.return');
-});
+
 
 
 Auth::routes();
@@ -52,13 +57,13 @@ Route::group(['prefix' => 'administrator', 'middleware' => 'auth'], function () 
     Route::get('/product/bulk', [ProductController::class, 'massUploadForm'])->name('product.bulk');
     Route::post('/product/bulk', [ProductController::class, 'massUpload'])->name('product.saveBulk');
     Route::group(['prefix' => 'orders'], function () {
-        Route::get('/', [OrderController::class, 'index'])->name('orders.index');
-        Route::delete('/{id}', [OrderController::class, 'destroy'])->name('orders.destroy');
-        Route::get('/{invoice}', [OrderController::class, 'view'])->name('orders.view');
-        Route::get('/payment/{invoice}', [OrderController::class, 'acceptPayment'])->name('orders.approve_payment');
-        Route::post('/shipping', [OrderController::class, 'shippingOrder'])->name('orders.shipping');
-        Route::get('/return/{invoice}', [OrderController::class, 'return'])->name('orders.return');
-        Route::post('/return', [OrderController::class, 'approveReturn'])->name('orders.approve_return');
+        Route::get('/', [AdminOrderController::class, 'index'])->name('orders.index');
+        Route::delete('/{id}', [AdminOrderController::class, 'destroy'])->name('orders.destroy');
+        Route::get('/{invoice}', [AdminOrderController::class, 'view'])->name('orders.view');
+        Route::get('/payment/{invoice}', [AdminOrderController::class, 'acceptPayment'])->name('orders.approve_payment');
+        Route::post('/shipping', [AdminOrderController::class, 'shippingOrder'])->name('orders.shipping');
+        Route::get('/return/{invoice}', [AdminOrderController::class, 'return'])->name('orders.return');
+        Route::post('/return', [AdminOrderController::class, 'approveReturn'])->name('orders.approve_return');
     });
 });
 
